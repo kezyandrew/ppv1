@@ -1,0 +1,8 @@
+[04-Dec-2024 20:00:06 Africa/Kampala] PHP Fatal error:  Uncaught Error: Class 'PHPUnit_Util_PHP' not found in /home2/patient/public_html/vendor/phpunit/phpunit/src/Util/PHP/Default.php:14
+Stack trace:
+#0 {main}
+  thrown in /home2/patient/public_html/vendor/phpunit/phpunit/src/Util/PHP/Default.php on line 14
+[04-Dec-2024 20:00:06 Africa/Kampala] PHP Fatal error:  Uncaught Error: Class 'PHPUnit_Util_PHP_Default' not found in /home2/patient/public_html/vendor/phpunit/phpunit/src/Util/PHP/Windows.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/patient/public_html/vendor/phpunit/phpunit/src/Util/PHP/Windows.php on line 19

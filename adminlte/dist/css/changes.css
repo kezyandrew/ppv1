@@ -1,0 +1,93 @@
+.nav .nav-treeview {
+    padding-left: 1rem;
+}
+
+
+.select2-container--default .select2-selection--single {
+    height: 38px !important;
+    border: 1px solid #ced4da !important;
+}
+
+.dt-button {
+    background-color: #ff0000 !important;
+    /* Change to your desired color */
+    color: #ffffff !important;
+    /* Change the text color if needed */
+}
+
+
+.dt-buttons.btn-group>.btn-group:not(:last-child)>.btn,
+.dt-buttons.btn-group>.btn:not(:last-child):not(.dropdown-toggle) {
+    padding: 0.25rem 0.5rem !important;
+    font-size: .875rem !important;
+    line-height: 1.5 !important;
+    border-radius: 0.2rem !important;
+
+    color: #fff !important;
+    background-color: #f1f2f7 !important;
+    border-color: #f1f2f7 !important;
+    box-shadow: none !important;
+    margin-right: 5px;
+    margin-bottom: 10px !important;
+    color: #333 !important;
+}
+
+.buttons-print {
+    padding: 0.25rem 0.5rem !important;
+    font-size: .875rem !important;
+    line-height: 1.5 !important;
+    border-radius: 0.2rem !important;
+
+    color: #fff !important;
+    background-color: #f1f2f7 !important;
+    border-color: #f1f2f7 !important;
+    box-shadow: none !important;
+    margin-right: 5px;
+    margin-bottom: 10px !important;
+    color: #333 !important;
+}
+
+/* .fc-direction-ltr .fc-daygrid-event.fc-event-end, .fc-direction-rtl .fc-daygrid-event.fc-event-start {
+    margin-right: 2px;
+    overflow: hidden;
+    padding: 3px 5px;
+    background: #f1f2f7;
+    margin: 3px;
+    font-size: .85em;
+}
+
+.fc .fc-daygrid-event-harness {
+    position: relative;
+    padding: 3px;
+} */
+
+
+
+.select2-selection__choice {
+    color: #000 !important;
+}
+
+.img_thumb {
+    width: 200px !important;
+    height: 150px !important;
+    max-width: 200px !important;
+    max-height: 150px !important;
+    line-height: 20px !important;
+    border: 1px solid #ccc;
+}
+
+.hidden {
+    display: none;
+}
+
+.delivery_status{
+    width: 100px;
+}
+
+body.swal2-toast-shown .swal2-container.swal2-top-end, body.swal2-toast-shown .swal2-container.swal2-top-right{
+    top: -5px !important;
+}
+
+.swal2-popup.swal2-toast .swal2-html-container{
+    margin: 0.5em 0em !important;
+}
