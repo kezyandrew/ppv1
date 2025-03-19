@@ -13,6 +13,32 @@
     .percent_input {
         padding: 6px 4px !important;
     }
+    
+    /* Styles for editable item fields */
+    .item-row {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .item-row:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .item-name, .item-price, .item-quantity {
+        margin-bottom: 5px;
+    }
+    
+    .item-total {
+        font-weight: bold;
+        display: inline-block;
+        padding-top: 8px;
+    }
+    
+    .qfloww .row {
+        margin-right: 0;
+        margin-left: 0;
+    }
 </style>
 
 <div class="content-wrapper">
@@ -365,8 +391,16 @@
 
                                             <div class="col-md-12 qfloww">
 
-                                                <label class=" col-md-10 float-left remove1"><?php echo lang('items') ?></label><label class="float-right col-md-2 remove"><?php echo lang('qty') ?></label>
-
+                                                <div class="item-header" style="width: 100%; margin-bottom: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-5"><strong><?php echo lang('item_name'); ?></strong></div>
+                                                        <div class="col-md-3"><strong><?php echo lang('price'); ?></strong></div>
+                                                        <div class="col-md-3"><strong><?php echo lang('quantity'); ?></strong></div>
+                                                        <div class="col-md-1"><strong><?php echo lang('total'); ?></strong></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- The item-table will be inserted here by JavaScript -->
 
                                             </div>
 
@@ -800,3 +834,4 @@
     var payment_gateway = "<?php echo $settings->payment_gateway; ?>";
 </script>
 <script src="common/extranal/js/finance/add_payment_view.js"></script>
+<script src="common/extranal/js/finance/editable_items.js"></script>

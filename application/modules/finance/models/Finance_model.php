@@ -114,12 +114,13 @@ class Finance_model extends CI_model
 
     function getPaymentByPatientIdByDate($id, $date_from, $date_to)
     {
-        $this->db->order_by('id', 'desc');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->select('*');
+        $this->db->from('payment');
         $this->db->where('patient', $id);
         $this->db->where('date >=', $date_from);
         $this->db->where('date <=', $date_to);
-        $query = $this->db->get('payment');
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $query = $this->db->get();
         return $query->result();
     }
 
@@ -593,10 +594,11 @@ class Finance_model extends CI_model
 
     function getDepositByPatientId($id)
     {
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
-        $this->db->order_by('id', 'desc');
+        $this->db->select('*');
+        $this->db->from('patient_deposit');
         $this->db->where('patient', $id);
-        $query = $this->db->get('patient_deposit');
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $query = $this->db->get();
         return $query->result();
     }
 
@@ -1526,5 +1528,29 @@ class Finance_model extends CI_model
     function lastRowByHospitalPayment(){
         return $this->db->where('hospital_id', $this->session->userdata('hospital_id'))
                         ->order_by('id',"desc")->limit(1)->get('payment')->row();
+    }
+
+    function getPaymentCategoryName($id)
+    {
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('id', $id);
+        $query = $this->db->get('payment_category');
+        return $query->row();
+    }
+
+    function getPaymentCategoryNameWithoutType($id)
+    {
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('id', $id);
+        $query = $this->db->get('payment_category');
+        return $query->row();
+    }
+
+    function getPaymentByIdForPos($id)
+    {
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('id', $id);
+        $query = $this->db->get('payment');
+        return $query->row();
     }
 }

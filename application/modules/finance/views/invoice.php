@@ -455,7 +455,15 @@
                                                     <tr>
                                                         <td><?php echo $i; ?> </td>
                                                        
-                                                        <td><?php echo $this->finance_model->getPaymentcategoryById($category_name3[0])->category; ?> </td>
+                                                        <td><?php
+                                                            // Check if there's an edited name (5th element)
+                                                            if (count($category_name3) > 4) {
+                                                                echo $category_name3[4];
+                                                            } else {
+                                                                $category_name_without_type = $this->finance_model->getPaymentCategoryById($category_name3[0])->category;
+                                                                echo $category_name_without_type;
+                                                            }
+                                                            ?></td>
                                                         <td><?php echo $this->finance_model->getPaymentcategoryById($category_name3[0])->description; ?> </td>
                                                         <td class=""><?php echo $settings->currency; ?> <?php echo $category_name3[1]; ?> </td>
                                                         <td class=""> <?php echo $category_name3[3]; ?> </td>

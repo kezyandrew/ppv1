@@ -217,18 +217,23 @@
                                                     $category_name3 = explode('*', $category_name2);
                                                     //$count=count+1;
                                                     if ($category_name3[3] > 0) {
-                                                    ?>
-
+                                                        ?>
                                                         <tr>
                                                             <td class="first_th"><?php echo $i; ?> </td>
-
-                                                            <td class="description_th"><?php echo $this->finance_model->getPaymentcategoryById($category_name3[0])->category; ?> </td>
+                                                            <td class="description_th"><?php 
+                                                                // Check if there's an edited name (5th element)
+                                                                if (count($category_name3) > 4) {
+                                                                    echo $category_name3[4];
+                                                                } else {
+                                                                    echo $this->finance_model->getPaymentcategoryById($category_name3[0])->category;
+                                                                }
+                                                            ?> </td>
                                                             <td class="service_th"><?php echo $this->finance_model->getPaymentcategoryById($category_name3[0])->description; ?> </td>
                                                             <td class="third_th"><?php echo $settings->currency; ?> <?php echo $category_name3[1]; ?> </td>
                                                             <td class="second_th"> <?php echo $category_name3[3]; ?> </td>
                                                             <td class="amount_th"><?php echo $settings->currency; ?> <?php echo $category_name3[1] * $category_name3[3]; ?> </td>
                                                         </tr>
-                                        <?php
+                                                        <?php
                                                     }
                                                 }
                                             }

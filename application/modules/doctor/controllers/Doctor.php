@@ -401,7 +401,7 @@ class Doctor extends MX_Controller
         redirect('doctor');
     }
 
-    function getDoctor()
+    public function getDoctor()
     {
         $requestData = $_REQUEST;
         $start = $requestData['start'];
@@ -437,6 +437,7 @@ class Doctor extends MX_Controller
 
 
         $i = 0;
+        $count = 0;
         foreach ($data['doctors'] as $doctor) {
             $i = $i + 1;
             if ($this->ion_auth->in_group(array('admin', 'Accountant', 'Receptionist'))) {
@@ -494,14 +495,15 @@ class Doctor extends MX_Controller
                 $depart,
                 $doctor->profile,
                 $options6 . ' ' . $options1 . ' ' . $options2 . ' ' . $options4 . ' ' . $options5 . ' ' . $options3,
-                // $dropdownOptions
+                $doctor->img_url,
             );
+            $count = $count + 1;
         }
 
         if (!empty($data['doctors'])) {
             $output = array(
                 "draw" => intval($requestData['draw']),
-                "recordsTotal" => count($this->doctor_model->getDoctor()),
+                "recordsTotal" => $count,
                 "recordsFiltered" => $i,
                 "data" => $info
             );
@@ -703,6 +705,15 @@ class Doctor extends MX_Controller
         $data['response'] = $option;
         $data['visit_description'] = $option;
         echo json_encode($data);
+    }
+
+    /* New function to get the total doctor count */
+    function getDoctorCount() {
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $count = $this->db->count_all_results('doctor');
+        
+        $response = array('count' => $count);
+        echo json_encode($response);
     }
 }
 

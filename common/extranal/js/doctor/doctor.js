@@ -72,8 +72,10 @@ tinymce.init({
   menubar: 'file edit view insert format tools table help',
   toolbar: 'undo redo | bold italic underline | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
   branding: false,
-  promotion: false
+  promotion: false,
+  height: 250
 });
+
 $(document).ready(function () {
   "use strict";
 
@@ -119,33 +121,24 @@ $(document).ready(function () {
           .val(response.doctor.department)
           .end();
         
-          // myEditor3.setData(response.doctor.profile);
-          //$("#profile1").val(response.doctor.profile);
-          tinymce.remove('#editor3');
-          tinymce.init({
-              selector: '#editor3',
-              plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
-              menubar: 'file edit view insert format tools table help',
-              toolbar: 'undo redo | bold italic underline | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
-              branding: false,
-              promotion: false,
-              init_instance_callback: function (editor) {
-                  // editor.setContent();
-                  editor.setContent(response.doctor.profile);
-              }
-          });
+        tinymce.remove('#editor3');
+        tinymce.init({
+            selector: '#editor3',
+            plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
+            menubar: 'file edit view insert format tools table help',
+            toolbar: 'undo redo | bold italic underline | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            branding: false,
+            promotion: false,
+            height: 250,
+            init_instance_callback: function (editor) {
+                editor.setContent(response.doctor.profile);
+            }
+        });
       
-
-        if (
-          typeof response.doctor.img_url !== "undefined" &&
-          response.doctor.img_url !== ""
-        ) {
+        if (typeof response.doctor.img_url !== "undefined" && response.doctor.img_url !== "") {
           $("#img").attr("src", response.doctor.img_url);
         }
-        if (
-          typeof response.doctor.signature !== "undefined" &&
-          response.doctor.signature !== ""
-        ) {
+        if (typeof response.doctor.signature !== "undefined" && response.doctor.signature !== "") {
           $("#signature").attr("src", response.doctor.signature);
         }
 
@@ -153,9 +146,15 @@ $(document).ready(function () {
           .val(response.doctor.department)
           .trigger("change");
 
-          $("#myModal2").modal("show");
+        $("#myModal2").modal("show");
       },
     });
+  });
+  
+  // Add click handler for grid view edit buttons
+  $(document).on("click", ".edit-btn", function () {
+    var doctorId = $(this).closest('.doctor-card').data('id');
+    $('.editbutton[data-id="' + doctorId + '"]').trigger('click');
   });
 });
 
@@ -164,15 +163,24 @@ $(document).ready(function () {
 
   $(".table").on("click", ".inffo", function () {
     "use strict";
-
     var iid = $(this).attr("data-id");
-
+    showDoctorInfo(iid);
+  });
+  
+  // Add click handler for grid view info buttons
+  $(document).on("click", ".info-btn", function () {
+    var doctorId = $(this).closest('.doctor-card').data('id');
+    showDoctorInfo(doctorId);
+  });
+  
+  function showDoctorInfo(iid) {
     $(".nameClass").html("").end();
     $(".emailClass").html("").end();
     $(".addressClass").html("").end();
     $(".phoneClass").html("").end();
     $(".departmentClass").html("").end();
     $(".profileClass").html("").end();
+    
     $.ajax({
       url: "doctor/editDoctorByJason?id=" + iid,
       method: "GET",
@@ -180,8 +188,6 @@ $(document).ready(function () {
       dataType: "json",
       success: function (response) {
         "use strict";
-
-        $("#editDoctorForm1").find('[name="id"]').val(response.doctor.id).end();
         $(".nameClass").append(response.doctor.name).end();
         $(".emailClass").append(response.doctor.email).end();
         $(".addressClass").append(response.doctor.address).end();
@@ -189,10 +195,7 @@ $(document).ready(function () {
         $(".departmentClass").append(response.doctor.department_name).end();
         $(".profileClass").append(response.doctor.profile).end();
 
-        $("#img1").attr(
-          "src",
-          "uploads/cardiology-patient-icon-vector-6244713.jpg"
-        );
+        $("#img1").attr("src", "uploads/cardiology-patient-icon-vector-6244713.jpg");
 
         if (
           typeof response.doctor.img_url !== "undefined" &&
@@ -204,19 +207,44 @@ $(document).ready(function () {
         $("#infoModal").modal("show");
       },
     });
-  });
+  }
 });
 
 $(document).ready(function () {
   "use strict";
 
+  // Get the total number of doctors (unfiltered)
+  function updateTotalDoctorsCount() {
+    $.ajax({
+      url: "doctor/getDoctorCount",
+      method: "GET",
+      dataType: "json",
+      success: function(response) {
+        $("#totalDoctorsCount").text(response.count);
+      },
+      error: function() {
+        // Fallback if the endpoint doesn't exist yet
+        $.ajax({
+          url: "doctor/getDoctor",
+          method: "POST",
+          data: {
+            length: -1,
+            search: {value: ''}
+          },
+          dataType: "json",
+          success: function(response) {
+            $("#totalDoctorsCount").text(response.recordsTotal);
+          }
+        });
+      }
+    });
+  }
+
   var table = $("#editable-sample").DataTable({
     responsive: true,
-
     processing: true,
     serverSide: true,
     searchable: true,
-    bScrollCollapse: true,
     ajax: {
       url: "doctor/getDoctor",
       type: "POST",
@@ -224,33 +252,77 @@ $(document).ready(function () {
     scroller: {
       loadingIndicator: true,
     },
-
     dom:
       "<'row'<'col-sm-3'l><'col-sm-5 text-center'B><'col-sm-4'f>>" +
       "<'row'<'col-sm-12'tr>>" +
       "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-
     buttons: [
-      { extend: "copyHtml5", exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
-      { extend: "excelHtml5", exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
-      { extend: "csvHtml5", exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
-      { extend: "pdfHtml5", exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
-      { extend: "print", exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
+      { 
+        extend: 'copyHtml5', 
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5] },
+        className: 'btn btn-outline-primary btn-sm me-1'
+      },
+      { 
+        extend: 'excelHtml5', 
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5] },
+        className: 'btn btn-outline-primary btn-sm me-1'
+      },
+      { 
+        extend: 'csvHtml5', 
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5] },
+        className: 'btn btn-outline-primary btn-sm me-1'
+      },
+      { 
+        extend: 'pdfHtml5', 
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5] },
+        className: 'btn btn-outline-primary btn-sm me-1'
+      },
+      { 
+        extend: 'print', 
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5] },
+        className: 'btn btn-outline-primary btn-sm'
+      },
     ],
     aLengthMenu: [
       [10, 25, 50, 100, -1],
       [10, 25, 50, 100, "All"],
     ],
-    iDisplayLength: 100,
+    iDisplayLength: 10,
     order: [[0, "desc"]],
-
     language: {
-      lengthMenu: "_MENU_",
+      lengthMenu: "_MENU_ records per page",
+      zeroRecords: "No doctors found",
+      info: "Showing _START_ to _END_ of _TOTAL_ doctors",
+      infoEmpty: "No doctors available",
+      infoFiltered: "(filtered from _MAX_ total records)",
       search: "_INPUT_",
+      searchPlaceholder: "Search...",
       url: "common/assets/DataTables/languages/" + language + ".json",
     },
+    initComplete: function(settings, json) {
+      // Update total doctors count (unfiltered)
+      updateTotalDoctorsCount();
+      
+      // Call the extern populateGridView function from doctor-custom.js
+      if (typeof window.populateGridView === 'function') {
+          window.populateGridView(json.data);
+      }
+    },
+    drawCallback: function(settings) {
+      // Add hover effects to buttons on table redraw
+      $('.btn').hover(
+          function() { $(this).addClass('shadow-sm'); },
+          function() { $(this).removeClass('shadow-sm'); }
+      );
+      
+      // Call the extern populateGridView function on data redraw
+      if (typeof window.populateGridView === 'function') {
+          window.populateGridView(table.rows().data());
+      }
+    }
   });
-  table.buttons().container().appendTo(".custom_buttons");
+  
+  table.buttons().container().appendTo('.custom_buttons');
 });
 
 $(document).ready(function () {

@@ -23,136 +23,139 @@ $(document).ready(function (e) {
     $("#id-div" + idd).remove();
     $("#idinput-" + idd).remove();
     $("#categoryinput-" + idd).remove();
+    $("#priceinput-" + idd).remove();
+    $("#nameinput-" + idd).remove();
+    recalculateTotals();
   });
+
+  // Function to recalculate totals - defined at the top level so it can be called from anywhere
+  function recalculateTotals() {
+    var tot = 0;
+    // Loop through all items and calculate totals
+    $(".item-row").each(function() {
+      var price = parseFloat($(this).find(".item-price").val()) || 0;
+      var qty = parseInt($(this).find(".item-quantity").val()) || 0;
+      var itemTotal = price * qty;
+      $(this).find(".item-total").text(currency + itemTotal.toFixed(2));
+      tot += itemTotal;
+    });
+    
+    var discount = ($("#dis_id_percent").val() * tot) / 100;
+    var vat_amount = $("#vat").val();
+    var vat = (vat_amount * tot) / 100;
+    var gross = tot - discount + vat;
+    
+    $("#editPaymentForm").find('[name="subtotal"]').val(tot.toFixed(2)).end();
+    $("#editPaymentForm").find('[name="discount"]').val(discount.toFixed(2)).end();
+    $("#editPaymentForm").find('[name="grsss"]').val(gross.toFixed(2));
+    $("#editPaymentForm").find('[name="vat_amount"]').val(vat.toFixed(2)).end();
+    
+    var amount_received = parseFloat($("#amount_received").val()) || 0;
+    var change = amount_received - gross;
+    $("#editPaymentForm").find('[name="change"]').val(change.toFixed(2)).end();
+    
+    var id = $("#id_pay").val() ? $("#id_pay").val() : null;
+    if (id !== null) {
+      $.ajax({
+        url: "finance/getDepositByInvoiceId?id=" + id,
+        method: "GET",
+        data: "",
+        dataType: "json",
+        success: function (response) {
+          var due = $("#gross").val() - response.response;
+          $("#due").val(due.toFixed(2));
+        },
+      });
+    } else {
+      $("#due").val((gross - amount_received).toFixed(2));
+    }
+  }
+
+  // Add event handlers for item name, price and quantity changes
+  $(document).on("input", ".item-name, .item-price, .item-quantity", function() {
+    recalculateTotals();
+  });
+  
+  // Also trigger recalculation when discount or VAT changes
+  $("#dis_id_percent, #vat, #amount_received").on("input", function() {
+    recalculateTotals();
+  });
+
   $.each($("select.multi-select option:selected"), function () {
     "use strict";
     var idd = $(this).data("idd");
     var qtity = $(this).data("qtity");
+    console.log("Selected item:", idd, "Name:", $(this).data("cat_name"), "Price:", $(this).data("id"), "Quantity:", qtity);
+    
     if ($("#idinput-" + idd).length) {
+      // Item already exists, do nothing
+      console.log("Item already exists:", idd);
     } else {
       if ($("#id-div" + idd).length) {
+        // Item div already exists, do nothing
+        console.log("Item div already exists:", idd);
       } else {
-        $("#editPaymentForm .qfloww").append(
-          '<div class="remove1" id="id-div' +
-          idd +
-          '">  ' +
-          '<i class="remove_attr fa fa-times" id="id-remove-' +
-          idd +
-          '" style="font-size:16px;color:red"></i> ' +
-          $(this).data("cat_name") +
-          " - " +
-          currency +
-          $(this).data("id") +
-          "</div>"
-        );
+        var itemName = $(this).data("cat_name");
+        var itemPrice = $(this).data("id");
+        
+        console.log("Creating new row for item:", idd, "Name:", itemName, "Price:", itemPrice);
+        
+        // Create a new row with editable fields
+        var newRow = '<div class="remove1 item-row" id="id-div' + idd + '">' +
+                     '<div class="row">' +
+                     '<div class="col-md-5">' +
+                     '<i class="remove_attr fa fa-times" id="id-remove-' + idd + '" style="font-size:16px;color:red"></i> ' +
+                     '<input type="text" class="form-control item-name" id="nameinput-' + idd + '" name="item_name[]" value="' + itemName + '">' +
+                     '</div>' +
+                     '<div class="col-md-3">' +
+                     '<input type="number" class="form-control item-price" id="priceinput-' + idd + '" name="item_price[]" value="' + itemPrice + '" step="0.01">' +
+                     '</div>' +
+                     '<div class="col-md-3">' +
+                     '<input type="number" class="form-control item-quantity" id="idinput-' + idd + '" name="quantity[]" value="' + (qtity || 1) + '" min="1">' +
+                     '</div>' +
+                     '<div class="col-md-1">' +
+                     '<span class="item-total">' + currency + (itemPrice * (qtity || 1)).toFixed(2) + '</span>' +
+                     '</div>' +
+                     '</div>' +
+                     '</div>';
+        
+        // Append the new row to the qfloww div
+        $("#editPaymentForm .qfloww").append(newRow);
+        console.log("New row appended to:", $("#editPaymentForm .qfloww").length ? "Found" : "Not found");
+        
+        // Add a hidden input for the category ID
+        $("<input>")
+          .attr({
+            type: "hidden",
+            class: "remove",
+            id: "categoryinput-" + idd,
+            name: "category_id[]",
+            value: idd,
+          })
+          .appendTo("#editPaymentForm .qfloww");
       }
-      var input2 = $("<input>")
-        .attr({
-          type: "text",
-          class: "remove",
-          id: "idinput-" + idd,
-          name: "quantity[]",
-          value: qtity,
-        })
-        .appendTo("#editPaymentForm .qfloww");
-
-      $("<input>")
-        .attr({
-          type: "hidden",
-          class: "remove",
-          id: "categoryinput-" + idd,
-          name: "category_id[]",
-          value: idd,
-        })
-        .appendTo("#editPaymentForm .qfloww");
     }
-    $(document).ready(function () {
-      "use strict";
-
-      $("#idinput-" + idd).keyup(function () {
-        "use strict";
-        var qty = 0;
-        var total = 0;
-        $.each($("select.multi-select option:selected"), function () {
-          var id1 = $(this).data("idd");
-          qty = $("#idinput-" + id1).val();
-          var ekokk = $(this).data("id");
-          total = total + qty * ekokk;
-        });
-        tot = total;
-        var discount = ($("#dis_id_percent").val() * tot) / 100;
-        var vat_amount = $("#vat").val();
-        var vat = (vat_amount * tot) / 100;
-        var gross = tot - discount + vat;
-        $("#editPaymentForm").find('[name="subtotal"]').val(tot).end();
-        $("#editPaymentForm")
-          .find('[name="discount"]')
-          .val(discount.toFixed(2))
-          .end();
-        $("#editPaymentForm").find('[name="grsss"]').val(gross);
-        $("#editPaymentForm").find('[name="vat_amount"]').val(vat).end();
-        var amount_received = $("#amount_received").val();
-        var change = amount_received - gross;
-        $("#editPaymentForm").find('[name="change"]').val(change).end();
-        var id = $("#id_pay").val() ? $("#id_pay").val() : null;
-        if (id !== null) {
-          $.ajax({
-            url: "finance/getDepositByInvoiceId?id=" + id,
-            method: "GET",
-            data: "",
-            dataType: "json",
-            success: function (response) {
-              var due = $("#gross").val() - response.response;
-              $("#due").val(due);
-            },
-          });
-        } else {
-          $("#due").val($("#gross").val() - amount_received);
-        }
-      });
-    });
-    ("use strict");
-    var sub_total = $(this).data("id") * $("#idinput-" + idd).val();
+    
+    // Initial calculation
+    var sub_total = $(this).data("id") * (qtity || 1);
     tot = tot + sub_total;
   });
-  ("use strict");
-  var discount = ($("#dis_id_percent").val() * tot) / 100;
-  // if (discount_type === "flat") {
-  var vat_amount = $("#vat").val();
-  var vat = (vat_amount * tot) / 100;
-  var gross = tot - discount + vat;
-  // } else {
-  //   var vat = (vat_amount * tot) / 100;
 
-  //   var gross = tot - (tot * discount) / 100 + vat;
-  // }
+  // Initial calculation of totals
+  recalculateTotals();
 
-  $("#editPaymentForm").find('[name="subtotal"]').val(tot).end();
-  $("#editPaymentForm")
-    .find('[name="discount"]')
-    .val(discount.toFixed(2))
-    .end();
-  $("#editPaymentForm").find('[name="vat_amount"]').val(vat.toFixed(2)).end();
-  $("#editPaymentForm").find('[name="grsss"]').val(gross);
-  var amount_received = $("#amount_received").val();
-  var change = gross - amount_received;
-  $("#editPaymentForm").find('[name="change"]').val(change).end();
-  var id = $("#id_pay").val() ? $("#id_pay").val() : null;
-
-  if (id !== null) {
-    $.ajax({
-      url: "finance/getDepositByInvoiceId?id=" + id,
-      method: "GET",
-      data: "",
-      dataType: "json",
-      success: function (response) {
-        var due = $("#gross").val() - response.response;
-        $("#due").val(due);
-      },
-    });
-  } else {
-    $("#due").val($("#gross").val() - amount_received);
-  }
+  // Handle removal of items
+  $(document).on("click", ".remove_attr", function() {
+    var id = $(this).attr("id");
+    var res = id.split("-");
+    var idd = res[2];
+    $("#id-div" + idd).remove();
+    $("#idinput-" + idd).remove();
+    $("#categoryinput-" + idd).remove();
+    $("#priceinput-" + idd).remove();
+    $("#nameinput-" + idd).remove();
+    recalculateTotals();
+  });
 });
 
 $(document).ready(function () {

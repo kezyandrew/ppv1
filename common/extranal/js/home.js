@@ -88,6 +88,33 @@ if (superadmin_login == 'no') {
         var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
         chart.draw(data, options);
     }
+
+    // Initialize tooltips for financial report cards
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize any new tooltips created dynamically
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    const newTooltips = [].slice.call(mutation.target.querySelectorAll('[data-bs-toggle="tooltip"]:not([data-bs-tooltip-initialized])'));
+                    newTooltips.forEach((tooltipEl) => {
+                        tooltipEl.setAttribute('data-bs-tooltip-initialized', 'true');
+                        new bootstrap.Tooltip(tooltipEl);
+                    });
+                }
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
 } else {
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawVisualization);

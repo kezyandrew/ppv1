@@ -42,53 +42,56 @@
     ?>
   </title>
 
-  <!-- <link rel="stylesheet" href="common/css/bootstrap-select.min.css"> -->
-
   <!-- Google Fonts -->
-
-
-
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="common/assets/bootstrap5/css/bootstrap.min.css" rel="stylesheet">
+  
   <!-- Font Awesome -->
   <link rel="stylesheet" href="adminlte/plugins/fontawesome-free/css/all.min.css">
+  
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- Tempusdominus Bootstrap 4 -->
-  <link rel="stylesheet" href="adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-  <!-- iCheck -->
-  <link rel="stylesheet" href="adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- JQVMap -->
-  <link rel="stylesheet" href="adminlte/plugins/jqvmap/jqvmap.min.css">
+  
+  <!-- Elite Admin Theme -->
+  <link rel="stylesheet" href="common/assets/bootstrap5/css/elite-admin.css">
+  <link rel="stylesheet" href="common/assets/bootstrap5/css/elite-utilities.css">
+  
+  <!-- Migration Helper CSS -->
+  <link rel="stylesheet" href="common/assets/bootstrap5/css/bootstrap-migration.css">
+  
+  <!-- Google Fonts CSS -->
+  <link rel="stylesheet" href="common/assets/bootstrap5/css/fonts.css">
+  
   <!-- Theme style -->
   <link rel="stylesheet" href="adminlte/dist/css/adminlte.min.css">
+  
   <!-- overlayScrollbars -->
   <link rel="stylesheet" href="adminlte/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  
   <!-- Daterange picker -->
   <link rel="stylesheet" href="adminlte/plugins/daterangepicker/daterangepicker.css">
+  
   <!-- summernote -->
-  <link rel="stylesheet" href="adminlte/plugins/summernote/summernote-bs4.min.css">
+  <link rel="stylesheet" href="adminlte/plugins/summernote/summernote-bs5.min.css">
 
-
-  <link rel="stylesheet" href="adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-  <link rel="stylesheet" href="adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-  <link rel="stylesheet" href="adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
-
+  <!-- DataTables -->
+  <link rel="stylesheet" href="adminlte/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="adminlte/plugins/datatables-responsive/css/responsive.bootstrap5.min.css">
+  <link rel="stylesheet" href="adminlte/plugins/datatables-buttons/css/buttons.bootstrap5.min.css">
 
   <link rel="stylesheet" href="adminlte/dist/css/changes.css">
 
-  <link rel="stylesheet" href="adminlte/plugins/daterangepicker/daterangepicker.css">
-  <link rel="stylesheet" href="adminlte/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+  <!-- Select2 -->
   <link rel="stylesheet" href="adminlte/plugins/select2/css/select2.min.css">
-  <link rel="stylesheet" href="adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
-  <link rel="stylesheet" href="adminlte/plugins/daterangepicker/daterangepicker.css">
-
-
+  <link rel="stylesheet" href="adminlte/plugins/select2-bootstrap5-theme/select2-bootstrap5.min.css">
+  
+  <!-- Fullcalendar -->
   <link rel="stylesheet" href="adminlte/plugins/fullcalendar/main.css">
   <link rel="stylesheet" href="adminlte/plugins/flag-icon-css/css/flag-icon.min.css">
 
+  <!-- Legacy datepicker libraries - to be migrated -->
   <link rel="stylesheet" href="common/assets/bootstrap-datepicker/css/bootstrap-datepicker.css" />
   <link rel="stylesheet" type="text/css" href="common/assets/bootstrap-daterangepicker/daterangepicker-bs3.css" />
   <link rel="stylesheet" type="text/css" href="common/assets/bootstrap-datetimepicker/css/datetimepicker.css" />
@@ -96,9 +99,9 @@
   <link rel="stylesheet" type="text/css" href="common/assets/jquery-multi-select/css/multi-select.css" />
   <link rel="stylesheet" type="text/css" href="common/css/lightbox.css" />
 
-
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  
   <!-- Toastr -->
   <link rel="stylesheet" href="adminlte/plugins/toastr/toastr.min.css">
 
@@ -106,17 +109,35 @@
   <link rel="stylesheet" href="adminlte/plugins/dropzone/min/dropzone.min.css">
 
   <?php
-
   if ($this->language == 'arabic') { ?>
+    <link rel="stylesheet" href="common/assets/bootstrap5/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="adminlte/dist/css/rtl.css">
   <?php } ?>
 
-  <!-- <link rel="stylesheet" href="common/css/bootstrap-select-country.min.css"> -->
-
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
   <div class="wrapper">
+
+    <?php
+    // Define flagIcon based on the current language
+    $flagIcon = 'us'; // Default flag
+    if ($this->language == 'arabic') {
+      $flagIcon = 'sa';
+    } elseif ($this->language == 'english') {
+      $flagIcon = 'us';
+    } elseif ($this->language == 'spanish') {
+      $flagIcon = 'es';
+    } elseif ($this->language == 'french') {
+      $flagIcon = 'fr';
+    } elseif ($this->language == 'italian') {
+      $flagIcon = 'it';
+    } elseif ($this->language == 'portuguese') {
+      $flagIcon = 'pt';
+    } elseif ($this->language == 'turkish') {
+      $flagIcon = 'tr';
+    }
+    ?>
 
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -125,355 +146,87 @@
         <li class="nav-item">
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
-
-
-        <!-- <li class="nav-item d-none d-sm-inline-block">
-          <a href="#" class="nav-link">Contact</a>
-        </li> -->
       </ul>
+
+      <!-- Search Form -->
+      <form class="form-inline ml-3">
+        <div class="input-group input-group-sm">
+          <input class="form-control form-control-navbar rounded-pill" type="search" placeholder="Search & enter" aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-navbar" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </form>
 
       <!-- Right navbar links -->
       <ul class="navbar-nav ml-auto">
-        <!-- Navbar Search -->
-        <!-- <li class="nav-item">
-          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-            <i class="fas fa-search"></i>
-          </a>
-          <div class="navbar-search-block">
-            <form class="form-inline">
-              <div class="input-group input-group-sm">
-                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                  </button>
-                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li> -->
-
-
-        <?php if ($this->ion_auth->in_group(array('admin'))) { ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-              <?php echo lang('quick_links'); ?>
-              <span class="badge badge-info navbar-badge"></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-
-              <?php if ($this->ion_auth->in_group(array('admin', 'Accountant', 'Receptionist'))) { ?>
-                <?php if (in_array('finance', $this->modules)) { ?>
-                  <a href="finance/addPaymentView" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('add_payment'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-money-check"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-
-
-              <?php if ($this->ion_auth->in_group(array('admin', 'Nurse', 'Accountant', 'Pharmacist', 'Doctor', 'Laboratorist', 'Receptionist'))) { ?>
-                <?php if (in_array('appointment', $this->modules)) { ?>
-                  <a href="appointment/addNewView" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('add_appointment'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-calendar-check"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-
-
-              <?php if ($this->ion_auth->in_group(array('admin', 'Nurse', 'Accountant', 'Pharmacist', 'Doctor', 'Laboratorist', 'Receptionist'))) { ?>
-                <?php if (in_array('patient', $this->modules)) { ?>
-                  <a href="patient/addNewView" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('add_patient'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-user"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-
-
-              <?php if ($this->ion_auth->in_group(array('admin'))) { ?>
-                <?php if (in_array('doctor', $this->modules)) { ?>
-                  <a href="doctor/addNewView" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('add_doctor'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-user"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-
-
-              <?php if ($this->ion_auth->in_group(array('Doctor'))) { ?>
-                <?php if (in_array('prescription', $this->modules)) { ?>
-                  <a href="prescription/addPrescriptionView" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('add_prescription'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-user"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-              <?php if ($this->ion_auth->in_group(array('admin', 'Nurse', 'Accountant', 'Pharmacist', 'Doctor', 'Laboratorist', 'Receptionist'))) { ?>
-                <?php if (in_array('lab', $this->modules)) { ?>
-                  <a href="lab" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('lab'); ?> <?php echo lang('reports'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fa fa-flask"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-              <?php if ($this->ion_auth->in_group(array('admin', 'Accountant', 'Receptionist'))) { ?>
-                <?php if (in_array('finance', $this->modules)) { ?>
-                  <a href="finance/dueCollection" class="dropdown-item">
-                    <!-- Message Start -->
-                    <div class="media">
-                      <div class="media-body">
-                        <h3 class="dropdown-item-title">
-                          <?php echo lang('due_collection'); ?>
-                          <span class="float-right text-sm text-danger"><i class="fas fa-money-check"></i></span>
-                        </h3>
-                      </div>
-                    </div>
-                    <!-- Message End -->
-                  </a>
-                  <div class="dropdown-divider"></div>
-                <?php } ?>
-              <?php } ?>
-
-
-
-
-            </div>
-          </li>
-        <?php } ?>
-
-
-
         <!-- Messages Dropdown Menu -->
-
         <?php if ($this->ion_auth->in_group(array('admin', 'Nurse', 'Accountant', 'Pharmacist', 'Doctor', 'Laboratorist', 'Receptionist'))) { ?>
           <?php if (in_array('chat', $this->modules)) { ?>
-            <li class="nav-item dropdown">
+            <li class="nav-item">
               <a class="nav-link" href="chat">
                 <i class="far fa-comments"></i>
-                <span class="badge badge-info navbar-badge" id="chatCount"></span>
+                <span class="badge badge-info rounded-pill navbar-badge" id="chatCount"></span>
               </a>
             </li>
           <?php } ?>
         <?php } ?>
-        <!-- Notifications Dropdown Menu -->
-
-
-        <?php if ($this->ion_auth->in_group(array('admin', 'Doctor', 'Nurse'))) : ?>
-          <?php if (in_array('bed', $this->modules)) : ?>
-            <li class="nav-item dropdown">
-              <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="fa fa-procedures"></i>
+        
+        <?php if ($this->ion_auth->in_group(array('admin'))) { ?>
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+              <i class="far fa-bell"></i>
+              <span class="badge badge-warning rounded-pill navbar-badge">
                 <?php
-                $this->db->where('hospital_id', $this->hospital_id);
-                $query = $this->db->get('bed')->result();
-                $available_bed = 0;
-                foreach ($query as $bed) {
-                  $last_a_time = explode('-', $bed->last_a_time);
-                  $last_d_time = explode('-', $bed->last_d_time);
-                  if (!empty($last_d_time[1])) {
-                    $last_d_h_am_pm = explode(' ', $last_d_time[1]);
-                    $last_d_h = explode(':', $last_d_h_am_pm[1]);
-                    if ($last_d_h_am_pm[2] == 'AM') {
-                      $last_d_m = ($last_d_h[0] * 60 * 60) + ($last_d_h[1] * 60);
-                    } else {
-                      $last_d_m = (12 * 60 * 60) + ($last_d_h[0] * 60 * 60) + ($last_d_h[1] * 60);
-                    }
-                    $last_d_time_s = strtotime($last_d_time[0]) + $last_d_m;
-                    if (time() > $last_d_time_s) {
-                      $available_bed = $available_bed + 1;
-                    }
-                  } else {
-                    $available_bed = $available_bed + 1;
+                  $count = 0;
+                  if (in_array('finance', $this->modules)) {
+                    $this->db->where('hospital_id', $this->hospital_id);
+                    $this->db->where('date', date('m/d/y'));
+                    $count += $this->db->get('payment')->num_rows();
                   }
-                }
-                ?>
-                <span class="badge badge-success navbar-badge"><?= $available_bed; ?></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header"><?= $available_bed; ?>
-                  <?php if ($available_bed <= 1) {
-                    echo lang('bed_is_available');
-                  } else {
-                    echo lang('beds_are_available');
-                  } ?>
-                </span>
-                <div class="dropdown-divider"></div>
-                <a href="bed/bedAllotment" class="dropdown-item">
-                  <?php if ($available_bed > 0) : ?>
-                    <?= lang('add_a_allotment'); ?>
-                  <?php else : ?>
-                    <?= lang('no_bed_is_available_for_allotment'); ?>
-                  <?php endif; ?>
-                  <span class="float-right text-muted text-sm"><?= ($available_bed > 0) ? 'Available' : 'Not Available'; ?></span>
-                </a>
-                <!-- Add more notifications or a footer link similar to "See All Notifications" if needed -->
-              </div>
-            </li>
-          <?php endif; ?>
-        <?php endif; ?>
-
-
-        <?php if ($this->ion_auth->in_group(array('admin', 'Accountant'))) : ?>
-          <?php if (in_array('finance', $this->modules)) : ?>
-            <li class="nav-item dropdown">
-              <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="fa fa-money-check"></i>
-                <?php
-                $this->db->where('hospital_id', $this->hospital_id);
-                $query = $this->db->get('payment');
-                $query = $query->result();
-                $payment_number = 0;
-                foreach ($query as $payment) {
-                  $payment_date = date('y/m/d', $payment->date);
-                  if ($payment_date == date('y/m/d')) {
-                    $payment_number++;
+                  if (in_array('appointment', $this->modules)) {
+                    $this->db->where('hospital_id', $this->hospital_id);
+                    $this->db->where('date', date('d-m-Y'));
+                    $count += $this->db->get('appointment')->num_rows();
                   }
-                }
+                  echo $count;
                 ?>
-                <span class="badge badge-danger navbar-badge"><?= $payment_number; ?></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header"><?= $payment_number; ?>
-                  <?php if ($payment_number <= 1) {
-                    echo lang('payment_today');
-                  } else {
-                    echo lang('payments_today');
-                  } ?>
-                </span>
-                <div class="dropdown-divider"></div>
+              </span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <span class="dropdown-item dropdown-header"><?php echo $count; ?> Notifications</span>
+              <div class="dropdown-divider"></div>
+              
+              <?php if (in_array('finance', $this->modules)) { ?>
                 <a href="finance/payment" class="dropdown-item">
-                  <?= lang('see_all_payments'); ?>
-                  <span class="float-right text-muted text-sm"><?= ($payment_number > 0) ? 'Available' : 'Not Available'; ?></span>
+                  <i class="fas fa-money-check mr-2"></i> <?php echo lang('payments_today'); ?>
+                  <span class="float-right text-muted text-sm">
+                    <?php
+                      $this->db->where('hospital_id', $this->hospital_id);
+                      $this->db->where('date', date('m/d/y'));
+                      echo $this->db->get('payment')->num_rows();
+                    ?>
+                  </span>
                 </a>
-                <!-- Add more notifications or a footer link similar to "See All Notifications" if needed -->
-              </div>
-            </li>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <?php if ($this->ion_auth->in_group(['admin', 'Accountant', 'Doctor', 'Nurse', 'Laboratorist'])) : ?>
-          <?php if (in_array('patient', $this->modules)) : ?>
-            <li class="nav-item dropdown">
-              <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="fa fa-user"></i>
-                <?php
-                $this->db->where('hospital_id', $this->hospital_id);
-                $this->db->where('add_date', date('m/d/y'));
-                $query = $this->db->get('patient');
-                $query = $query->result();
-                $patient_number = count($query);
-                ?>
-                <span class="badge badge-warning navbar-badge"><?= $patient_number; ?></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header">
-                  <?= $patient_number; ?>
-                  <?php if ($patient_number <= 1) : ?>
-                    <?= lang('patient_registerred_today'); ?>
-                  <?php else : ?>
-                    <?= lang('patients_registerred_today'); ?>
-                  <?php endif; ?>
-                </span>
-                <div class="dropdown-divider"></div>
-                <a href="patient" class="dropdown-item">
-                  <?= lang('see_all_patients'); ?>
-                  <span class="float-right text-muted text-sm"><?= ($patient_number > 0) ? 'Available' : 'Not Available'; ?></span>
+              <?php } ?>
+              
+              <?php if (in_array('appointment', $this->modules)) { ?>
+                <a href="appointment" class="dropdown-item">
+                  <i class="fas fa-calendar-check mr-2"></i> <?php echo lang('appointments_today'); ?>
+                  <span class="float-right text-muted text-sm">
+                    <?php
+                      $this->db->where('hospital_id', $this->hospital_id);
+                      $this->db->where('date', date('d-m-Y'));
+                      echo $this->db->get('appointment')->num_rows();
+                    ?>
+                  </span>
                 </a>
-                <!-- Add more notifications or a footer link similar to "See All Notifications" if needed -->
-              </div>
-            </li>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <?php
-
-        if ($this->language == 'arabic') {
-          $flagIcon = 'sa';
-        }
-        if ($this->language == 'english') {
-          $flagIcon = 'us';
-        }
-        if ($this->language == 'spanish') {
-          $flagIcon = 'es';
-        }
-        if ($this->language == 'french') {
-          $flagIcon = 'fr';
-        }
-        if ($this->language == 'italian') {
-          $flagIcon = 'it';
-        }
-        if ($this->language == 'portuguese') {
-          $flagIcon = 'pt';
-        }
-        if ($this->language == 'turkish') {
-          $flagIcon = 'tr';
-        }
-        ?>
+              <?php } ?>
+            </div>
+          </li>
+        <?php } ?>
 
         <!-- Language Dropdown Menu -->
         <?php if ($this->ion_auth->in_group(array('admin', 'superadmin'))) { ?>
@@ -521,57 +274,11 @@
           </li>
         <?php } ?>
 
-        <?php if ($this->ion_auth->in_group(array('Patient', 'Doctor'))) { ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="">
-              <i class="flag-icon flag-icon-<?php echo $flagIcon; ?>"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right p-0">
-              <a href="profile/changeLanguageFlag?lang=arabic" class="dropdown-item <?php if ($this->language == 'arabic') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-sa mr-2"></i> عربى
-              </a>
-              <a href="profile/changeLanguageFlag?lang=english" class="dropdown-item <?php if ($this->language == 'english') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-us mr-2"></i> English
-              </a>
-              <a href="profile/changeLanguageFlag?lang=spanish" class="dropdown-item <?php if ($this->language == 'spanish') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-es mr-2"></i> Español
-              </a>
-              <a href="profile/changeLanguageFlag?lang=french" class="dropdown-item <?php if ($this->language == 'french') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-fr mr-2"></i> Français
-              </a>
-              <a href="profile/changeLanguageFlag?lang=italian" class="dropdown-item <?php if ($this->language == 'italian') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-it mr-2"></i> Italiano
-              </a>
-              <a href="profile/changeLanguageFlag?lang=portuguese" class="dropdown-item <?php if ($this->language == 'portuguese') {
-                                                                                            echo 'active';
-                                                                                          } ?>">
-                <i class="flag-icon flag-icon-pt mr-2"></i> Português
-              </a>
-              <a href="profile/changeLanguageFlag?lang=turkish" class="dropdown-item <?php if ($this->language == 'turkish') {
-                                                                                        echo 'active';
-                                                                                      } ?>">
-                <i class="flag-icon flag-icon-tr mr-2"></i> Türkçe
-              </a>
-            </div>
-          </li>
-        <?php } ?>
-
         <li class="nav-item">
           <a class="nav-link" title="<?php echo lang('full_screen'); ?>" data-widget="fullscreen" role="button">
             <i class="fas fa-expand-arrows-alt"></i>
           </a>
         </li>
-
 
         <li class="nav-item">
           <a class="nav-link" title="<?php echo lang('log_out'); ?>" href="auth/logout" role="button">

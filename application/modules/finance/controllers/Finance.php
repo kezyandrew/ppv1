@@ -90,6 +90,8 @@ class Finance extends MX_Controller
             $category_selected = $this->input->post('category_name');
             $item_selected = $this->input->post('category_id');
             $quantity = $this->input->post('quantity');
+            $item_name = $this->input->post('item_name');
+            $item_price = $this->input->post('item_price');
             $remarks = $this->input->post('remarks');
             $vat = $this->input->post('vat_amount');
             $vat_amount = $this->input->post('vat');
@@ -97,13 +99,19 @@ class Finance extends MX_Controller
             $item_quantity_array = array_combine($item_selected, $quantity);
             $cat_and_price = array();
             if (!empty($item_quantity_array)) {
+                $i = 0;
                 foreach ($item_quantity_array as $key => $value) {
                     $current_item = $this->finance_model->getPaymentCategoryById($key);
-                    $category_price = $current_item->c_price;
+                    // Use the edited price if available, otherwise use the original price
+                    $category_price = !empty($item_price[$i]) ? $item_price[$i] : $current_item->c_price;
                     $category_type = $current_item->type;
                     $qty = $value;
-                    $cat_and_price[] = $key . '*' . $category_price . '*' . $category_type . '*' . $qty;
+                    // Store the edited item name if available
+                    $edited_name = !empty($item_name[$i]) ? $item_name[$i] : $current_item->category;
+                    // Store the original category ID, edited price, category type, quantity, and edited name
+                    $cat_and_price[] = $key . '*' . $category_price . '*' . $category_type . '*' . $qty . '*' . $edited_name;
                     $amount_by_category[] = $category_price * $qty;
+                    $i++;
                 }
                 $category_name = implode(',', $cat_and_price);
             }
@@ -223,6 +231,8 @@ class Finance extends MX_Controller
         $category_selected = $this->input->post('category_name');
         $item_selected = $this->input->post('category_id');
         $quantity = $this->input->post('quantity');
+        $item_name = $this->input->post('item_name');
+        $item_price = $this->input->post('item_price');
         $remarks = $this->input->post('remarks');
 
         if (empty($item_selected)) {
@@ -234,13 +244,19 @@ class Finance extends MX_Controller
         }
         $cat_and_price = array();
         if (!empty($item_quantity_array)) {
+            $i = 0;
             foreach ($item_quantity_array as $key => $value) {
                 $current_item = $this->finance_model->getPaymentCategoryById($key);
-                $category_price = $current_item->c_price;
+                // Use the edited price if available, otherwise use the original price
+                $category_price = !empty($item_price[$i]) ? $item_price[$i] : $current_item->c_price;
                 $category_type = $current_item->type;
                 $qty = $value;
-                $cat_and_price[] = $key . '*' . $category_price . '*' . $category_type . '*' . $qty;
+                // Store the edited item name if available
+                $edited_name = !empty($item_name[$i]) ? $item_name[$i] : $current_item->category;
+                // Store the original category ID, edited price, category type, quantity, and edited name
+                $cat_and_price[] = $key . '*' . $category_price . '*' . $category_type . '*' . $qty . '*' . $edited_name;
                 $amount_by_category[] = $category_price * $qty;
+                $i++;
             }
             $category_name = implode(',', $cat_and_price);
         } else {
