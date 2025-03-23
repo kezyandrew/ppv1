@@ -172,6 +172,8 @@ class Report extends MX_Controller
         $data['patients'] = $this->patient_model->getPatient();
         $id = $this->input->get('id');
         $data['report'] = $this->report_model->getReportById($id);
+        $doctor = !empty($data['report']->doctor) ? $data['report']->doctor : null;
+        $data['doctor'] = $doctor ? $this->doctor_model->getDoctorById($doctor) : null;
         $this->load->view('home/dashboard');
         $this->load->view('add_report', $data);
         $this->load->view('home/footer');
@@ -181,10 +183,29 @@ class Report extends MX_Controller
     {
         $id = $this->input->get('id');
         $data['report'] = $this->report_model->getReportById($id);
-        $doctor = $data['report']->doctor;
-        $data['doctor'] = $this->doctor_model->getDoctorById($doctor);
-        $patient = $data['report']->patient;
-        $data['patient'] = $this->patient_model->getPatientById($patient);
+        
+        // Handle doctor data safely
+        if (!empty($data['report']->doctor)) {
+            $doctor_id = $data['report']->doctor;
+            $data['doctor'] = $this->doctor_model->getDoctorById($doctor_id);
+        } else {
+            $data['doctor'] = null;
+        }
+        
+        // Handle patient data safely
+        if (!empty($data['report']->patient)) {
+            // Extract patient id correctly from the patient string (format: id*ion_user_id)
+            $patient_parts = explode('*', $data['report']->patient);
+            if (isset($patient_parts[0]) && !empty($patient_parts[0])) {
+                $patient_id = $patient_parts[0];  // Get the patient id part
+                $data['patient'] = $this->patient_model->getPatientById($patient_id);
+            } else {
+                $data['patient'] = null;
+            }
+        } else {
+            $data['patient'] = null;
+        }
+        
         echo json_encode($data);
     }
 

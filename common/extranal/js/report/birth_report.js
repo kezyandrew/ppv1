@@ -19,6 +19,15 @@ $(document).ready(function () {
         "use strict";
         var iid = $(this).attr('data-id');
         $('#editReportForm').trigger("reset");
+        
+        // Initialize Select2 properly
+        $('.js-example-basic-single').select2('destroy');
+        $('.js-example-basic-single').select2({
+            placeholder: 'Select an option',
+            allowClear: true,
+            width: '100%'
+        });
+        
         $.ajax({
             url: 'report/editReportByJason?id=' + iid,
             method: 'GET',
@@ -29,53 +38,9 @@ $(document).ready(function () {
                 // Populate the form fields with the data returned from server
                 $('#editReportForm').find('[name="id"]').val(response.report.id).end();
                 $('#editReportForm').find('[name="type"]').val(response.report.report_type).end();
-                $('#editReportForm').find('[name="patient"]').val(response.report.patient).end();
-                //  $('#editReportForm').find('[name="doctor"]').val(response.report.doctor).end();
                 $('#editReportForm').find('[name="date"]').val(response.report.date).end();
-                if (response.doctor !== null) {
-                    var option1 = new Option(
-                        response.doctor.name,
-                        response.doctor.id,
-                        true,
-                        true
-                    );
-                } else {
-                    var option1 = new Option(" " + "-" + "", "", true, true);
-                }
-
-                $("#editReportForm")
-                    .find('[name="doctor"]')
-                    .append(option1)
-                    .trigger("change");
-
-                $(".js-example-basic-single.doctor")
-                    .val(response.report.doctor)
-                    .trigger("change");
-
-
-
-                if (response.patient !== null) {
-                    var option1 = new Option(
-                        response.patient.name,
-                        response.patient.id,
-                        true,
-                        true
-                    );
-                } else {
-                    var option1 = new Option(" " + "-" + "", "", true, true);
-                }
-
-                $("#editReportForm")
-                    .find('[name="patient"]')
-                    .append(option1)
-                    .trigger("change");
-
-                $(".js-example-basic-single.patient")
-                    .val(response.report.patient)
-                    .trigger("change");
-
-
-
+                
+                // Initialize the editor with the description content
                 tinymce.remove('#editor1');
                 tinymce.init({
                     selector: '#editor1',
@@ -85,14 +50,25 @@ $(document).ready(function () {
                     branding: false,
                     promotion: false,
                     init_instance_callback: function (editor) {
-                        // editor.setContent();
                         editor.setContent(response.report.description);
                     }
                 });
+                
+                // Handle doctor selection
+                if (response.doctor) {
+                    var doctorValue = response.report.doctor;
+                    $('#editReportForm').find('[name="doctor"]').val(doctorValue).trigger('change');
+                }
+                
+                // Handle patient selection
+                if (response.patient) {
+                    var patientId = response.report.patient;
+                    $('#editReportForm').find('[name="patient"]').val(patientId).trigger('change');
+                }
+                
                 $('#myModal2').modal('show');
             }
-        })
-
+        });
     });
 });
 

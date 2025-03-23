@@ -88,49 +88,51 @@
                             <div class="row">
                                 <div class="col-2">
                                     <div class="icon-big text-center">
-                                        <i class="fas fa-file-invoice text-purple"></i>
-                        </div>
-                                                    </div>
+                                        <i class="fas fa-user-md text-primary"></i>
+                                    </div>
+                                </div>
                                 <div class="col-10">
                                     <div class="stats">
                                         <h5 class="card-title text-muted mb-0">
-                                            PROCESSED INVOICES 
-                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="All fully paid invoices in the system (where status is 'paid')"></i>
+                                            ACTIVE DOCTORS 
+                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Number of active doctors in the system"></i>
                                         </h5>
-                                        <h3 class="text-purple fw-bold">
-                                                    <?php
-                                            // Count all fully paid invoices for this hospital
+                                        <h3 class="text-primary fw-bold">
+                                            <?php
+                                            // Count all active doctors for this hospital
                                             $this->db->where('hospital_id', $this->hospital_id);
-                                            $this->db->where('status', 'paid');
-                                            $query = $this->db->get('payment');
+                                            $query = $this->db->get('doctor');
                                             $query = $query->result();
-                                            $payment_number = count($query);
+                                            $doctor_number = count($query);
                                             
-                                            echo $payment_number;
+                                            echo $doctor_number;
                                             ?>
                                         </h3>
-                                        </div>
                                     </div>
                                 </div>
-                            <div class="progress-bar bg-purple mt-2" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="text-center text-muted small mt-1">All fully paid invoices</div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            </div>
+                            <div class="progress-bar bg-primary mt-2" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="text-center text-muted small mt-1">Total active doctors</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="card card-stats mb-4">
-                                    <div class="card-body">
-                                    <div class="row">
+                        <div class="card-body">
+                            <div class="row">
                                 <div class="col-2">
                                     <div class="icon-big text-center">
                                         <i class="fas fa-hospital-user text-success"></i>
-                                                    </div>
-                                                    </div>
+                                    </div>
+                                </div>
                                 <div class="col-10">
                                     <div class="stats">
-                                        <h5 class="card-title text-muted mb-0">ALL PATIENTS</h5>
+                                        <h5 class="card-title text-muted mb-0">
+                                            ALL PATIENTS
+                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Total number of patients registered in the system"></i>
+                                        </h5>
                                         <h3 class="text-success fw-bold">
-                                                    <?php
+                                            <?php
                                             $this->db->where('hospital_id', $this->hospital_id);
                                             $query = $this->db->get('patient');
                                             $query = $query->result();
@@ -138,16 +140,17 @@
                                             echo $patient_total;
                                             ?>
                                         </h3>
-                                                </div>
-                                            </div>
-                                                    </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="progress-bar bg-success mt-2" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            </div>
+                            <div class="text-center text-muted small mt-1">Total registered patients</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Additional Financial Insights -->
+            <!-- Additional Demographic Cards -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card card-stats mb-4">
@@ -155,32 +158,50 @@
                             <div class="row">
                                 <div class="col-2">
                                     <div class="icon-big text-center">
-                                        <i class="fas fa-exclamation-circle text-warning"></i>
+                                        <i class="fas fa-procedures text-info"></i>
                                     </div>
                                 </div>
                                 <div class="col-10">
                                     <div class="stats">
                                         <h5 class="card-title text-muted mb-0">
-                                            PENDING INVOICES
-                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="All invoices with pending balances in the system (where status is 'unpaid')"></i>
+                                            TOTAL BEDS 
+                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Total beds available in the hospital"></i>
                                         </h5>
-                                        <h3 class="text-warning fw-bold">
-                                                    <?php
-                                            // Count all invoices with pending balances for this hospital
+                                        <h3 class="text-info fw-bold">
+                                            <?php
+                                            // Get total beds for this hospital
                                             $this->db->where('hospital_id', $this->hospital_id);
-                                            $this->db->where('status', 'unpaid');
-                                            $query = $this->db->get('payment');
-                                            $query = $query->result();
-                                            $pending_payment_number = count($query);
+                                            $query = $this->db->get('bed');
+                                            $beds = $query->result();
+                                            $bed_count = count($beds);
                                             
-                                            echo $pending_payment_number;
+                                            // Get occupied beds
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $this->db->where('status', 'Allotted');
+                                            $query_alloted = $this->db->get('bed');
+                                            $alloted_beds = $query_alloted->result();
+                                            $alloted_bed_count = count($alloted_beds);
+                                            
+                                            // Available beds
+                                            $available_beds = $bed_count - $alloted_bed_count;
+                                            
+                                            echo $bed_count;
                                             ?>
                                         </h3>
-                                        </div>
                                     </div>
                                 </div>
-                            <div class="progress-bar bg-warning mt-2" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="text-center text-muted small mt-1">All invoices with pending balances</div>
+                            </div>
+                            <div class="progress mt-2" style="height: 10px;">
+                                <?php if($bed_count > 0): ?>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo ($available_beds/$bed_count)*100; ?>%" aria-valuenow="<?php echo ($available_beds/$bed_count)*100; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: <?php echo ($alloted_bed_count/$bed_count)*100; ?>%" aria-valuenow="<?php echo ($alloted_bed_count/$bed_count)*100; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                <?php else: ?>
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="text-center text-muted small mt-1">
+                                <?php echo $available_beds; ?> available / <?php echo $alloted_bed_count; ?> occupied
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -191,32 +212,65 @@
                             <div class="row">
                                 <div class="col-2">
                                     <div class="icon-big text-center">
-                                        <i class="fas fa-chart-pie text-info"></i>
+                                        <i class="fas fa-users text-purple"></i>
                                     </div>
                                 </div>
                                 <div class="col-10">
                                     <div class="stats">
                                         <h5 class="card-title text-muted mb-0">
-                                            INVOICE DISTRIBUTION
-                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Distribution between processed and pending invoices"></i>
+                                            STAFF DISTRIBUTION
+                                            <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Breakdown of hospital staff by role"></i>
                                         </h5>
-                                        <?php
-                                        $total_invoices = $payment_number + $pending_payment_number;
-                                        $paid_percentage = $total_invoices > 0 ? round(($payment_number / $total_invoices) * 100) : 0;
-                                        $unpaid_percentage = $total_invoices > 0 ? round(($pending_payment_number / $total_invoices) * 100) : 0;
-                                        ?>
-                                        <h3 class="text-info fw-bold">
-                                            <?php echo $paid_percentage; ?>% <span class="small text-muted">paid</span>
+                                        <h3 class="text-purple fw-bold">
+                                            <?php
+                                            // Count different types of staff
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $nurses = $this->db->get('nurse')->num_rows();
+                                            
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $pharmacists = $this->db->get('pharmacist')->num_rows();
+                                            
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $laboratorists = $this->db->get('laboratorist')->num_rows();
+                                            
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $accountants = $this->db->get('accountant')->num_rows();
+                                            
+                                            $this->db->where('hospital_id', $this->hospital_id);
+                                            $receptionists = $this->db->get('receptionist')->num_rows();
+                                            
+                                            // Total staff excluding doctors (shown in other card)
+                                            $total_staff = $nurses + $pharmacists + $laboratorists + $accountants + $receptionists;
+                                            
+                                            echo $total_staff;
+                                            ?>
                                         </h3>
                                     </div>
                                 </div>
                             </div>
                             <div class="progress mt-2" style="height: 10px;">
-                                <div class="progress-bar bg-purple" role="progressbar" style="width: <?php echo $paid_percentage; ?>%" aria-valuenow="<?php echo $paid_percentage; ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                <div class="progress-bar bg-warning" role="progressbar" style="width: <?php echo $unpaid_percentage; ?>%" aria-valuenow="<?php echo $unpaid_percentage; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                <?php if($total_staff > 0): ?>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo ($nurses/$total_staff)*100; ?>%" aria-valuenow="<?php echo ($nurses/$total_staff)*100; ?>" aria-valuemin="0" aria-valuemax="100" title="Nurses"></div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo ($pharmacists/$total_staff)*100; ?>%" aria-valuenow="<?php echo ($pharmacists/$total_staff)*100; ?>" aria-valuemin="0" aria-valuemax="100" title="Pharmacists"></div>
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: <?php echo ($laboratorists/$total_staff)*100; ?>%" aria-valuenow="<?php echo ($laboratorists/$total_staff)*100; ?>" aria-valuemin="0" aria-valuemax="100" title="Laboratorists"></div>
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: <?php echo ($accountants/$total_staff)*100; ?>%" aria-valuenow="<?php echo ($accountants/$total_staff)*100; ?>" aria-valuemin="0" aria-valuemax="100" title="Accountants"></div>
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: <?php echo ($receptionists/$total_staff)*100; ?>%" aria-valuenow="<?php echo ($receptionists/$total_staff)*100; ?>" aria-valuemin="0" aria-valuemax="100" title="Receptionists"></div>
+                                <?php else: ?>
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                <?php endif; ?>
                             </div>
+                            <div class="chart-container mt-3" style="height: 150px;">
+                                <canvas id="staff_distribution_chart"></canvas>
+                            </div>
+                            <!-- Hidden spans to store staff counts for the chart -->
+                            <span id="nurse-count" class="d-none"><?php echo $nurses; ?></span>
+                            <span id="pharmacist-count" class="d-none"><?php echo $pharmacists; ?></span>
+                            <span id="laboratorist-count" class="d-none"><?php echo $laboratorists; ?></span>
+                            <span id="accountant-count" class="d-none"><?php echo $accountants; ?></span>
+                            <span id="receptionist-count" class="d-none"><?php echo $receptionists; ?></span>
+                            
                             <div class="text-center text-muted small mt-1">
-                                <?php echo $payment_number; ?> paid / <?php echo $pending_payment_number; ?> pending
+                                <?php echo $nurses; ?> nurses, <?php echo $pharmacists; ?> pharmacists, <?php echo $laboratorists; ?> laboratorists, <?php echo $accountants; ?> accountants, <?php echo $receptionists; ?> receptionists
                             </div>
                         </div>
                     </div>
@@ -785,6 +839,48 @@
                     const paymentData = [65, 59, 80, 81, 56, 55, 40, 80, 81, 56, 55, 40];
                     const expenseData = [28, 48, 40, 19, 86, 27, 90, 40, 19, 86, 27, 90];
                     const appointmentData = [45, 25, 60, 31, 96, 55, 30, 60, 31, 96, 55, 30];
+                    
+                    // Staff Distribution Chart
+                    const staffDistCtx = document.getElementById('staff_distribution_chart');
+                    if (staffDistCtx) {
+                        const nurseCount = parseInt(document.getElementById('nurse-count').innerText);
+                        const pharmacistCount = parseInt(document.getElementById('pharmacist-count').innerText);
+                        const laboratoristCount = parseInt(document.getElementById('laboratorist-count').innerText);
+                        const accountantCount = parseInt(document.getElementById('accountant-count').innerText);
+                        const receptionistCount = parseInt(document.getElementById('receptionist-count').innerText);
+                        
+                        const staffChart = new Chart(staffDistCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Nurses', 'Pharmacists', 'Laboratorists', 'Accountants', 'Receptionists'],
+                                datasets: [{
+                                    data: [nurseCount, pharmacistCount, laboratoristCount, accountantCount, receptionistCount],
+                                    backgroundColor: [
+                                        '#0dcaf0',
+                                        '#198754',
+                                        '#ffc107',
+                                        '#dc3545',
+                                        '#6f42c1'
+                                    ],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 10,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
                     
                     const yearlyChart = new Chart(yearlyCtx, {
                         type: 'line',

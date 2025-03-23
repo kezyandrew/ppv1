@@ -53,8 +53,11 @@
                                             <td>
                                                 <?php
                                                 $patient = explode('*', $report->patient);
-                                                if (!empty($patient)) {
-                                                    echo $this->patient_model->getPatientById($patient[0])->name;
+                                                if (!empty($patient) && isset($patient[0]) && !empty($patient[0])) {
+                                                    $patient_obj = $this->patient_model->getPatientById($patient[0]);
+                                                    echo $patient_obj ? $patient_obj->name : 'Patient Not Found';
+                                                } else {
+                                                    echo 'Patient Not Found';
                                                 }
                                                 ?>
                                             </td>
@@ -62,7 +65,10 @@
                                             <td>
                                                 <?php
                                                 if (!empty($report->doctor)) {
-                                                    echo $this->doctor_model->getDoctorById($report->doctor)->name;
+                                                    $doctor_obj = $this->doctor_model->getDoctorById($report->doctor);
+                                                    echo $doctor_obj ? $doctor_obj->name : 'Doctor Not Found';
+                                                } else {
+                                                    echo 'Doctor Not Found';
                                                 }
                                                 ?>
                                             </td>
@@ -150,12 +156,13 @@
                         <select class="form-control m-bot15 js-example-basic-single" name="patient" value='' required="">
                             <?php foreach ($patients as $patient) { ?>
                                 <option value="<?php echo $patient->id . '*' . $patient->ion_user_id; ?>" <?php
-                                                                                                            if (!empty($report->patient)) {
-                                                                                                                if (explode('*', $report->patient)[1] == $patient->ion_user_id) {
-                                                                                                                    echo 'selected';
-                                                                                                                }
-                                                                                                            }
-                                                                                                            ?>><?php echo $patient->name; ?> </option>
+                                if (!empty($report->patient)) {
+                                    $patient_parts = explode('*', $report->patient);
+                                    if (isset($patient_parts[0]) && $patient_parts[0] == $patient->id) {
+                                        echo 'selected';
+                                    }
+                                }
+                                ?>><?php echo $patient->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -164,12 +171,12 @@
                         <select class="form-control m-bot15 js-example-basic-single" name="doctor" value='' required="">
                             <?php foreach ($doctors as $doctor) { ?>
                                 <option value="<?php echo $doctor->id; ?>" <?php
-                                                                            if (!empty($report->doctor)) {
-                                                                                if ($report->doctor == $doctor->name) {
-                                                                                    echo 'selected';
-                                                                                }
-                                                                            }
-                                                                            ?>><?php echo $doctor->name; ?> </option>
+                                if (!empty($report->doctor)) {
+                                    if ($report->doctor == $doctor->id) {
+                                        echo 'selected';
+                                    }
+                                }
+                                ?>><?php echo $doctor->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -207,7 +214,7 @@
             <div class="modal-body">
                 <form role="form" id="editReportForm" class="clearfix" action="report/addReport" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Select Type &ast;</label>
+                        <label for="exampleInputEmail1"><?php echo lang('select_type'); ?> &ast;</label>
                         <select class="form-control m-bot15" name="type" value='' required="">
                             <option value="birth" <?php
                                                     if (!empty($report->report_type)) {
@@ -233,23 +240,21 @@
                         </select>
                     </div>
                     <div class="form-group">
-
-
                         <label for="exampleInputEmail1"><?php echo lang('description'); ?> &ast;</label>
                         <input type="text" class="form-control" name="description" id="editor1" value='' placeholder="">
-
                     </div>
                     <div class="form-group">
                         <label for="exampleInputEmail1"><?php echo lang('patient'); ?> &ast;</label>
                         <select class="form-control m-bot15 js-example-basic-single patient" name="patient" value='' required="">
                             <?php foreach ($patients as $patient) { ?>
                                 <option value="<?php echo $patient->id . '*' . $patient->ion_user_id; ?>" <?php
-                                                                                                            if (!empty($report->patient)) {
-                                                                                                                if (explode('*', $report->patient)[1] == $patient->ion_user_id) {
-                                                                                                                    echo 'selected';
-                                                                                                                }
-                                                                                                            }
-                                                                                                            ?>><?php echo $patient->name; ?> </option>
+                                if (!empty($report->patient)) {
+                                    $patient_parts = explode('*', $report->patient);
+                                    if (isset($patient_parts[0]) && $patient_parts[0] == $patient->id) {
+                                        echo 'selected';
+                                    }
+                                }
+                                ?>><?php echo $patient->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -258,26 +263,23 @@
                         <select class="form-control m-bot15 js-example-basic-single doctor" name="doctor" value='' required="">
                             <?php foreach ($doctors as $doctor) { ?>
                                 <option value="<?php echo $doctor->id; ?>" <?php
-                                                                            if (!empty($report->doctor)) {
-                                                                                if ($report->doctor == $doctor->name) {
-                                                                                    echo 'selected';
-                                                                                }
-                                                                            }
-                                                                            ?>><?php echo $doctor->name; ?> </option>
+                                if (!empty($report->doctor)) {
+                                    if ($report->doctor == $doctor->id) {
+                                        echo 'selected';
+                                    }
+                                }
+                                ?>><?php echo $doctor->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="exampleInputEmail1"><?php echo lang('date'); ?> &ast;</label>
                         <input class="form-control form-control-inline input-medium default-date-picker readonly" name="date" size="16" type="text" value="" required="" />
-
                     </div>
                     <input type="hidden" name="id" value=''>
-
                     <div class="">
                         <button type="submit" name="submit" class="btn btn-info float-right"><?php echo lang('submit'); ?></button>
                     </div>
-
                 </form>
             </div>
         </div><!-- /.modal-content -->

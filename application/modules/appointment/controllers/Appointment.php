@@ -126,11 +126,47 @@ class Appointment extends MX_Controller
         if ($this->ion_auth->in_group(array('Patient'))) {
             redirect('home/permission');
         }
-        $data['appointment'] = '';
-        $data['patients'] = $this->patient_model->getPatient();
+        $data['appointment'] = new stdClass(); // Initialize as an empty object
+        
+        // Initialize default properties to avoid "undefined property" errors
+        $data['appointment']->id = null;
+        $data['appointment']->payment_status = null;
+        $data['appointment']->visit_description = null;
+        $data['appointment']->date = null;
+        $data['appointment']->remarks = null;
+        $data['appointment']->status = null;
+        $data['appointment']->visit_charges = null;
+        $data['appointment']->discount = null;
+        $data['appointment']->grand_total = null;
+        
+        // Debug information
+        $data['is_object'] = is_object($data['appointment']);
+        $data['has_payment_status'] = isset($data['appointment']->payment_status);
+        
+        // Load all required model data
+        $data['patients'] = null; // Initialize to null by default
+        $data['doctors'] = null; // Initialize to null by default
+        
+        // If user is a patient, get their info
+        if ($this->ion_auth->in_group(array('Patient'))) {
+            $user = $this->ion_auth->get_user_id();
+            $data['patients'] = $this->db->get_where('patient', array('ion_user_id' => $user))->row();
+        } else {
+            // For other users, load patient list for selection
+            $data['patients'] = $this->patient_model->getPatient();
+        }
+        
         $data['doctors'] = $this->doctor_model->getDoctor();
         $data['settings'] = $this->settings_model->getSettings();
         $data['gateway'] = $this->finance_model->getGatewayByName($data['settings']->payment_gateway);
+        
+        // Add visits data for the dropdown
+        try {
+            $data['visits'] = $this->doctorvisit_model->getDoctorvisit();
+        } catch (Exception $e) {
+            $data['visits'] = []; // If there's an error, set to empty array
+        }
+        
         $this->load->view('home/dashboard', $data);
         $this->load->view('add_new', $data);
         $this->load->view('home/footer');

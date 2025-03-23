@@ -11,6 +11,51 @@ class Attendance extends MX_Controller {
         $this->load->model('pharmacist/pharmacist_model');
         $this->load->model('nurse/nurse_model');
         $this->load->model('doctor/doctor_model');
+        
+        // Check and update table structure
+        $this->check_attendance_table();
+    }
+
+    // Function to check and update attendance table structure
+    private function check_attendance_table() {
+        $this->load->dbforge();
+        
+        try {
+            // Check if hospital_id column exists
+            $fields = $this->db->field_data('attendance');
+            $hospital_id_exists = false;
+            
+            if ($fields) {
+                foreach ($fields as $field) {
+                    if ($field->name == 'hospital_id') {
+                        $hospital_id_exists = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Add hospital_id column if it doesn't exist
+            if (!$hospital_id_exists) {
+                $fields = array(
+                    'hospital_id' => array(
+                        'type' => 'INT',
+                        'constraint' => 11,
+                        'default' => 0
+                    )
+                );
+                $this->dbforge->add_column('attendance', $fields);
+                
+                // Update existing records to have the current hospital_id
+                $hospital_id = $this->session->userdata('hospital_id');
+                if (!empty($hospital_id)) {
+                    $this->db->update('attendance', array('hospital_id' => $hospital_id));
+                }
+                
+                log_message('info', 'Added hospital_id column to attendance table');
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error checking attendance table: ' . $e->getMessage());
+        }
     }
 
     public function index() {
@@ -185,24 +230,25 @@ class Attendance extends MX_Controller {
     public function createNewAttendance() {
         $current_month = date('F');
         $current_year = date('Y');
+        $hospital_id = $this->session->userdata('hospital_id');
 
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array1 = $this->db->get('accountant')->result_array();
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array2 = $this->db->get('laboratorist')->result_array();
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array3 = $this->db->get('receptionist')->result_array();
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array4 = $this->db->get('pharmacist')->result_array();
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array5 = $this->db->get('nurse')->result_array();
         $this->db->select('*');
-        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('hospital_id', $hospital_id);
         $array6 = $this->db->get('doctor')->result_array();
 
         $allEmployees = array_merge($array1, $array2, $array3, $array4, $array5, $array6);
@@ -210,7 +256,11 @@ class Attendance extends MX_Controller {
         foreach ($allEmployees as $employee) {
             $log = '';
             $details = '';
-            $result = $this->db->get_where('attendance', array('staff' => $employee['ion_user_id'], 'month' => $current_month, 'year' => $current_year))->row();
+            $this->db->where('staff', $employee['ion_user_id']);
+            $this->db->where('month', $current_month);
+            $this->db->where('year', $current_year);
+            $this->db->where('hospital_id', $hospital_id);
+            $result = $this->db->get('attendance')->row();
 
             if (empty($result)) {
                 for ($i = 1; $i <= date('d'); $i++) {
@@ -228,7 +278,8 @@ class Attendance extends MX_Controller {
                     'month' => $current_month,
                     'year' => $current_year,
                     'log' => $log,
-                    'details' => $details
+                    'details' => $details,
+                    'hospital_id' => $hospital_id
                 );
 
                 $this->db->insert('attendance', $data);
@@ -237,6 +288,7 @@ class Attendance extends MX_Controller {
                 if (count($logs) < date('d')) {
                     $newLog = $result->log;
                     $newDetails = $result->details;
+                    $logCount = count($logs) + 1;
                     while ($logCount <= date('d')) {
                         $newLog .= '_no';
                         $newDetails .= '#NONE_NONE_NONE_NONE_office';
@@ -245,7 +297,8 @@ class Attendance extends MX_Controller {
 
                     $newData = array(
                         'log' => $newLog,
-                        'details' => $newDetails
+                        'details' => $newDetails,
+                        'hospital_id' => $hospital_id
                     );
 
                     $this->db->where('id', $result->id);
@@ -285,6 +338,7 @@ class Attendance extends MX_Controller {
         $late = $this->input->post('late');
         $halfday = $this->input->post('halfday');
         $work_from = $this->input->post('work_from');
+        $hospital_id = $this->session->userdata('hospital_id');
 
         $id = $this->input->post('id');
         $month = date('F', strtotime($date));
@@ -313,7 +367,8 @@ class Attendance extends MX_Controller {
 
         $data = array(
             'log' => $log,
-            'details' => $detail
+            'details' => $detail,
+            'hospital_id' => $hospital_id
         );
 
         $this->attendance_model->updateAttendance($id, $data);
@@ -529,12 +584,26 @@ class Attendance extends MX_Controller {
             redirect('auth/login', 'refresh');
         }
         
-            $year = $this->db->get('attendance')->result();
-            if (!empty($year)) {
-                $start = $year[0]->year;
-            } else {
-                $start = date('Y');
-            }
+        // Check permissions properly
+        $is_admin = $this->ion_auth->in_group('admin');
+        $permissions = $this->ion_auth->in_group(array('admin', 'Doctor', 'Nurse', 'Laboratorist', 'Accountant', 'Receptionist', 'Pharmacist'));
+        
+        // If not admin and not in authorized groups, show clear permissions error
+        if (!$permissions) {
+            $this->session->set_flashdata('error', lang('access_denied'));
+            redirect('home', 'refresh');
+            return; // Exit the function entirely
+        }
+        
+        // At this point, user has permission to continue
+        $data['permissions'] = true;
+        
+        $year = $this->db->get('attendance')->result();
+        if (!empty($year)) {
+            $start = $year[0]->year;
+        } else {
+            $start = date('Y');
+        }
         $data['years'] = [];
         $data['months'] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -542,39 +611,55 @@ class Attendance extends MX_Controller {
             array_push($data['years'], $start);
             $start += 1;
         }
+        
+        // Initialize all variables to avoid undefined errors
         $staff = $this->input->post('staff');
-        $r_year = $this->input->post('r_year');
-        $r_month = $this->input->post('r_month');
+        $r_year = $this->input->post('r_year') ? $this->input->post('r_year') : date('Y');
+        $r_month = $this->input->post('r_month') ? $this->input->post('r_month') : date('F');
+        
         $data['staff_select'] = $staff;
         $data['year_select'] = $r_year;
         $data['month_select'] = $r_month;
-
+        $data['attendances'] = array(); // Initialize with empty array to avoid errors
+        $data['staff_info'] = null;
+        $data['total_diff'] = array(); // Initialize to avoid undefined variable errors
 
         if (!empty($staff)) {
-            $data['staff_info'] = $this->db->get_where('users', array('id' => $this->input->post('staff')))->row();
-
-            // if (!empty($r_year)) {
-            //     $data['attendances'] = $this->attendance_model->getAttendanceByYear($staff, $r_year);
-            // } 
-            if (!empty($r_month)) {
+            $user_exists = $this->db->get_where('users', array('id' => $staff))->row();
+            if ($user_exists) {
+                $data['staff_info'] = $user_exists;
                 
-                $data['attendances'] = $this->attendance_model->getAttendanceByMonth($staff, $r_month, $r_year);
+                if (!empty($r_month) && !empty($r_year)) {
+                    $attendances = $this->attendance_model->getAttendanceByMonth($staff, $r_month, $r_year);
+                    if (!empty($attendances)) {
+                        $data['attendances'] = $attendances;
+                    }
+                }
             }
-
-        } else {
-            
         }
-        //
         
+        // Hospital ID filtering for staff lists
+        $hospital_id = $this->session->userdata('hospital_id');
+        
+        // Load staff lists with hospital ID filter
+        $this->db->where('hospital_id', $hospital_id);
         $data['accountants'] = $this->accountant_model->getAccountant();
+        
+        $this->db->where('hospital_id', $hospital_id);
         $data['laboratorists'] = $this->laboratorist_model->getLaboratorist();
+        
+        $this->db->where('hospital_id', $hospital_id);
         $data['receptionists'] = $this->receptionist_model->getReceptionist();
+        
+        $this->db->where('hospital_id', $hospital_id);
         $data['pharmacists'] = $this->pharmacist_model->getPharmacist();
+        
+        $this->db->where('hospital_id', $hospital_id);
         $data['nurses'] = $this->nurse_model->getNurse();
+        
+        $this->db->where('hospital_id', $hospital_id);
         $data['doctors'] = $this->doctor_model->getDoctor();
-        // $data['attendances'] = $this->attendance_model->getAttendance();
-        // print_r($data['attendances']);
-        // die();
+        
         $this->load->view('home/dashboard');
         $this->load->view('attendance_report', $data);
         $this->load->view('home/footer');

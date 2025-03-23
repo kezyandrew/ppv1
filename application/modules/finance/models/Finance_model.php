@@ -574,7 +574,21 @@ class Finance_model extends CI_model
     function getDeposit()
     {
         $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
-        $query = $this->db->get('patient_deposit');
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('payment');
+        return $query->result();
+    }
+
+    function getDepositByYear($year)
+    {
+        $first_day_of_year = strtotime("first day of January $year");
+        $last_day_of_year = strtotime("last day of December $year");
+        
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('date >=', $first_day_of_year);
+        $this->db->where('date <=', $last_day_of_year);
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('payment');
         return $query->result();
     }
 
@@ -758,6 +772,20 @@ class Finance_model extends CI_model
     function getExpense()
     {
         $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('expense');
+        return $query->result();
+    }
+
+    function getExpenseByYear($year)
+    {
+        $first_day_of_year = strtotime("first day of January $year");
+        $last_day_of_year = strtotime("last day of December $year");
+        
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('date >=', $first_day_of_year);
+        $this->db->where('date <=', $last_day_of_year);
+        $this->db->order_by('id', 'desc');
         $query = $this->db->get('expense');
         return $query->result();
     }
@@ -1552,5 +1580,44 @@ class Finance_model extends CI_model
         $this->db->where('id', $id);
         $query = $this->db->get('payment');
         return $query->row();
+    }
+
+    // Special function to get properly formatted payment data for income vs expense report
+    function getPaymentsForIncomeExpense($year)
+    {
+        $first_day_of_year = strtotime("first day of January $year");
+        $last_day_of_year = strtotime("last day of December $year");
+        
+        $this->db->select('id, patient, amount, gross_total, date, hospital_id');
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('date >=', $first_day_of_year);
+        $this->db->where('date <=', $last_day_of_year);
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('payment');
+        
+        $payments = $query->result();
+        
+        // Map gross_total to deposited_amount for compatibility
+        foreach ($payments as $payment) {
+            $payment->deposited_amount = $payment->gross_total;
+        }
+        
+        return $payments;
+    }
+
+    // Special function to get properly formatted expense data for income vs expense report
+    function getExpensesForIncomeExpense($year)
+    {
+        $first_day_of_year = strtotime("first day of January $year");
+        $last_day_of_year = strtotime("last day of December $year");
+        
+        $this->db->select('id, category, amount, date, hospital_id');
+        $this->db->where('hospital_id', $this->session->userdata('hospital_id'));
+        $this->db->where('date >=', $first_day_of_year);
+        $this->db->where('date <=', $last_day_of_year);
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('expense');
+        
+        return $query->result();
     }
 }

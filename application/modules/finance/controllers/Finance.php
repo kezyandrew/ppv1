@@ -2019,13 +2019,54 @@ class Finance extends MX_Controller
         $data['payment_categories'] = $this->finance_model->getPaymentCategory();
         $data['expense_categories'] = $this->finance_model->getExpenseCategory();
 
-        $data['payments'] = $this->finance_model->getPaymentByDate($date_from, $date_to);
-        $data['ot_payments'] = $this->finance_model->getOtPaymentByDate($date_from, $date_to);
-        $data['deposits'] = $this->finance_model->getDepositsByDate($date_from, $date_to);
-        $data['expenses'] = $this->finance_model->getExpenseByDate($date_from, $date_to);
+        // Get payment data with proper validation
+        if (!empty($date_from) && !empty($date_to)) {
+            $data['payments'] = $this->finance_model->getPaymentByDate($date_from, $date_to);
+            $data['ot_payments'] = $this->finance_model->getOtPaymentByDate($date_from, $date_to);
+            $data['deposits'] = $this->finance_model->getDepositsByDate($date_from, $date_to);
+            $data['expenses'] = $this->finance_model->getExpenseByDate($date_from, $date_to);
+        } else {
+            // Default to current month if no date range provided
+            $month_start = strtotime(date('Y-m-01'));
+            $month_end = strtotime(date('Y-m-t') . ' 23:59:59');
+            
+            $data['payments'] = $this->finance_model->getPaymentByDate($month_start, $month_end);
+            $data['ot_payments'] = $this->finance_model->getOtPaymentByDate($month_start, $month_end);
+            $data['deposits'] = $this->finance_model->getDepositsByDate($month_start, $month_end);
+            $data['expenses'] = $this->finance_model->getExpenseByDate($month_start, $month_end);
+            
+            // Set default date range for display
+            $data['from'] = date('Y-m-01');
+            $data['to'] = date('Y-m-t');
+        }
 
-        $data['from'] = $this->input->post('date_from');
-        $data['to'] = $this->input->post('date_to');
+        // Ensure data is in the correct format
+        if (!empty($data['payments'])) {
+            foreach ($data['payments'] as &$payment) {
+                // Convert numeric strings to float for calculations
+                if (isset($payment->amount)) $payment->amount = (float)$payment->amount;
+                if (isset($payment->vat)) $payment->vat = (float)$payment->vat;
+                if (isset($payment->flat_discount)) $payment->flat_discount = (float)$payment->flat_discount;
+                if (isset($payment->gross_total)) $payment->gross_total = (float)$payment->gross_total;
+                if (isset($payment->hospital_amount)) $payment->hospital_amount = (float)$payment->hospital_amount;
+                if (isset($payment->doctor_amount)) $payment->doctor_amount = (float)$payment->doctor_amount;
+            }
+        }
+
+        if (!empty($data['deposits'])) {
+            foreach ($data['deposits'] as &$deposit) {
+                if (isset($deposit->deposited_amount)) $deposit->deposited_amount = (float)$deposit->deposited_amount;
+            }
+        }
+
+        if (!empty($data['expenses'])) {
+            foreach ($data['expenses'] as &$expense) {
+                if (isset($expense->amount)) $expense->amount = (float)$expense->amount;
+            }
+        }
+
+        $data['from'] = $this->input->post('date_from') ?: $data['from'];
+        $data['to'] = $this->input->post('date_to') ?: $data['to'];
         $data['settings'] = $this->settings_model->getSettings();
         $this->load->view('home/dashboard');
         $this->load->view('financial_report', $data);
@@ -2522,26 +2563,104 @@ class Finance extends MX_Controller
         if (empty($month)) {
             $month = date('m');
         }
+        
+        // Set flags to identify if this is the current month/year
+        $data['is_current_month'] = ($month == date('m') && $year == date('Y'));
+        $data['is_current_year'] = ($year == date('Y'));
 
         $first_minute = mktime(0, 0, 0, $month, 1, $year);
         $last_minute = mktime(23, 59, 59, $month, date("t", $first_minute), $year);
 
+        // Get payments data
         $payments = $this->finance_model->getPaymentByDate($first_minute, $last_minute);
         $all_payments = array();
+        
+        // Additional data for analytics
+        $total_amount = 0;
+        $highest_amount = 0;
+        $highest_day = null;
+        $working_days_total = 0;
+        $working_days_count = 0;
+        $weekend_total = 0;
+        $weekend_days_count = 0;
+        
+        // Process payment data
         foreach ($payments as $payment) {
-            $date = date('D d-m-y', $payment->date);
+            $timestamp = $payment->date;
+            $date = date('D d-m-y', $timestamp);
+            $day_number = date('j', $timestamp);
+            
+            // Ensure we're working with numeric values
+            $amount = 0;
+            if (isset($payment->gross_total) && !empty($payment->gross_total)) {
+                $amount = floatval($payment->gross_total);
+            } elseif (isset($payment->amount) && !empty($payment->amount)) {
+                $amount = floatval($payment->amount);
+            }
+            
+            // Add to daily totals
             if (array_key_exists($date, $all_payments)) {
-                $all_payments[$date] = $all_payments[$date] + $payment->gross_total;
+                $all_payments[$date] = $all_payments[$date] + $amount;
             } else {
-                $all_payments[$date] = $payment->gross_total;
+                $all_payments[$date] = $amount;
+            }
+            
+            // Track highest day
+            if ($all_payments[$date] > $highest_amount) {
+                $highest_amount = $all_payments[$date];
+                $highest_day = $day_number;
+            }
+            
+            // Add to total
+            $total_amount += $amount;
+            
+            // Track weekday vs weekend totals
+            $day_of_week = date('N', $timestamp); // 1-7 (Mon-Sun)
+            if ($day_of_week >= 6) { // 6-7 is weekend (Sat-Sun)
+                $weekend_total += $amount;
+                $weekend_days_count++;
+            } else {
+                $working_days_total += $amount;
+                $working_days_count++;
             }
         }
+        
+        // Calculate averages
+        $days_in_month = date('t', $first_minute);
+        $days_passed = min($days_in_month, date('j'));
+        $average_per_day = ($days_passed > 0) ? ($total_amount / $days_passed) : 0;
+        $working_day_average = ($working_days_count > 0) ? ($working_days_total / $working_days_count) : 0;
+        $weekend_day_average = ($weekend_days_count > 0) ? ($weekend_total / $weekend_days_count) : 0;
+        
+        // Get system settings for currency
+        $settings = $this->settings_model->getSettings();
 
+        // Basic data
         $data['year'] = $year;
         $data['month'] = $month;
         $data['first_minute'] = $first_minute;
         $data['last_minute'] = $last_minute;
         $data['all_payments'] = $all_payments;
+        $data['settings'] = $settings;
+        
+        // Enhanced analytics data
+        $data['total_amount'] = $total_amount;
+        $data['average_per_day'] = $average_per_day;
+        $data['highest_amount'] = $highest_amount;
+        $data['highest_day'] = $highest_day;
+        $data['working_days_total'] = $working_days_total;
+        $data['working_day_average'] = $working_day_average;
+        $data['weekend_total'] = $weekend_total;
+        $data['weekend_day_average'] = $weekend_day_average;
+        $data['days_in_month'] = $days_in_month;
+        $data['days_passed'] = $days_passed;
+        
+        // Update page title for better clarity
+        $data['page_title'] = date('F Y', $first_minute) . ' - ' . lang('hospital') . ' ' . lang('sales_report');
+        
+        // Get current day total for quick reference
+        $current_date = date('D d-m-y');
+        $data['current_day_total'] = !empty($all_payments[$current_date]) ? $all_payments[$current_date] : 0;
 
         $this->load->view('home/dashboard', $data);
         $this->load->view('daily', $data);
@@ -2560,26 +2679,102 @@ class Finance extends MX_Controller
         if (empty($month)) {
             $month = date('m');
         }
+        
+        // Set flags to identify if this is the current month/year
+        $data['is_current_month'] = ($month == date('m') && $year == date('Y'));
+        $data['is_current_year'] = ($year == date('Y'));
 
         $first_minute = mktime(0, 0, 0, $month, 1, $year);
         $last_minute = mktime(23, 59, 59, $month, date("t", $first_minute), $year);
 
+        // Get expense data
         $expenses = $this->finance_model->getExpenseByDate($first_minute, $last_minute);
         $all_expenses = array();
+        
+        // Additional data for analytics
+        $total_amount = 0;
+        $highest_amount = 0;
+        $highest_day = null;
+        $working_days_total = 0;
+        $working_days_count = 0;
+        $weekend_total = 0;
+        $weekend_days_count = 0;
+        
+        // Process expense data
         foreach ($expenses as $expense) {
-            $date = date('D d-m-y', $expense->date);
+            $timestamp = $expense->date;
+            $date = date('D d-m-y', $timestamp);
+            $day_number = date('j', $timestamp);
+            
+            // Ensure we're working with numeric values
+            $amount = 0;
+            if (isset($expense->amount) && !empty($expense->amount)) {
+                $amount = floatval($expense->amount);
+            }
+            
+            // Add to daily totals
             if (array_key_exists($date, $all_expenses)) {
-                $all_expenses[$date] = $all_expenses[$date] + $expense->amount;
+                $all_expenses[$date] = $all_expenses[$date] + $amount;
             } else {
-                $all_expenses[$date] = $expense->amount;
+                $all_expenses[$date] = $amount;
+            }
+            
+            // Track highest day
+            if ($all_expenses[$date] > $highest_amount) {
+                $highest_amount = $all_expenses[$date];
+                $highest_day = $day_number;
+            }
+            
+            // Add to total
+            $total_amount += $amount;
+            
+            // Track weekday vs weekend totals
+            $day_of_week = date('N', $timestamp); // 1-7 (Mon-Sun)
+            if ($day_of_week >= 6) { // 6-7 is weekend (Sat-Sun)
+                $weekend_total += $amount;
+                $weekend_days_count++;
+            } else {
+                $working_days_total += $amount;
+                $working_days_count++;
             }
         }
+        
+        // Calculate averages
+        $days_in_month = date('t', $first_minute);
+        $days_passed = min($days_in_month, date('j'));
+        $average_per_day = ($days_passed > 0) ? ($total_amount / $days_passed) : 0;
+        $working_day_average = ($working_days_count > 0) ? ($working_days_total / $working_days_count) : 0;
+        $weekend_day_average = ($weekend_days_count > 0) ? ($weekend_total / $weekend_days_count) : 0;
+        
+        // Get system settings for currency
+        $settings = $this->settings_model->getSettings();
 
+        // Basic data
         $data['year'] = $year;
         $data['month'] = $month;
         $data['first_minute'] = $first_minute;
         $data['last_minute'] = $last_minute;
         $data['all_expenses'] = $all_expenses;
+        $data['settings'] = $settings;
+        
+        // Enhanced analytics data
+        $data['total_amount'] = $total_amount;
+        $data['average_per_day'] = $average_per_day;
+        $data['highest_amount'] = $highest_amount;
+        $data['highest_day'] = $highest_day;
+        $data['working_days_total'] = $working_days_total;
+        $data['working_day_average'] = $working_day_average;
+        $data['weekend_total'] = $weekend_total;
+        $data['weekend_day_average'] = $weekend_day_average;
+        $data['days_in_month'] = $days_in_month;
+        $data['days_passed'] = $days_passed;
+        
+        // Update page title for better clarity
+        $data['page_title'] = date('F Y', $first_minute) . ' - ' . lang('hospital') . ' ' . lang('expense_report');
+        
+        // Get current day total for quick reference
+        $current_date = date('D d-m-y');
+        $data['current_day_total'] = !empty($all_expenses[$current_date]) ? $all_expenses[$current_date] : 0;
 
         $this->load->view('home/dashboard', $data);
         $this->load->view('daily_expense', $data);
@@ -2594,32 +2789,57 @@ class Finance extends MX_Controller
         if (empty($year)) {
             $year = date('Y');
         }
-
+        
+        // Set a flag to identify if this is the current year
+        $data['is_current_year'] = ($year == date('Y'));
 
         $first_minute = mktime(0, 0, 0, 1, 1, $year);
         $last_minute = mktime(23, 59, 59, 12, 31, $year);
 
+        // Get payments data
         $payments = $this->finance_model->getPaymentByDate($first_minute, $last_minute);
         $all_payments = array();
+        
+        // Process payment data
         foreach ($payments as $payment) {
             $month = date('m-Y', $payment->date);
+            
+            // Ensure we're working with numeric values
+            $amount = 0;
+            if (isset($payment->gross_total) && !empty($payment->gross_total)) {
+                $amount = floatval($payment->gross_total);
+            } elseif (isset($payment->amount) && !empty($payment->amount)) {
+                $amount = floatval($payment->amount);
+            }
+            
+            // Add to monthly total
             if (array_key_exists($month, $all_payments)) {
-                $all_payments[$month] = $all_payments[$month] + $payment->gross_total;
+                $all_payments[$month] = $all_payments[$month] + $amount;
             } else {
-                $all_payments[$month] = $payment->gross_total;
+                $all_payments[$month] = $amount;
             }
         }
-
+        
+        // Get system settings for currency
+        $settings = $this->settings_model->getSettings();
+        
+        // Pass data to view
         $data['year'] = $year;
         $data['first_minute'] = $first_minute;
         $data['last_minute'] = $last_minute;
         $data['all_payments'] = $all_payments;
+        $data['settings'] = $settings;
+        $data['page_title'] = $year . ' ' . lang('hospital') . ' ' . lang('sales_report');
+        
+        // Get current month total for quick reference
+        $current_month = date('m-Y');
+        $data['current_month_total'] = !empty($all_payments[$current_month]) ? $all_payments[$current_month] : 0;
 
         $this->load->view('home/dashboard', $data);
         $this->load->view('monthly', $data);
         $this->load->view('home/footer');
     }
-
+    
     function monthlyExpense()
     {
         $data = array();
@@ -2628,26 +2848,49 @@ class Finance extends MX_Controller
         if (empty($year)) {
             $year = date('Y');
         }
-
+        
+        // Set a flag to identify if this is the current year
+        $data['is_current_year'] = ($year == date('Y'));
 
         $first_minute = mktime(0, 0, 0, 1, 1, $year);
         $last_minute = mktime(23, 59, 59, 12, 31, $year);
 
+        // Get expense data
         $expenses = $this->finance_model->getExpenseByDate($first_minute, $last_minute);
         $all_expenses = array();
+        
+        // Process expense data
         foreach ($expenses as $expense) {
             $month = date('m-Y', $expense->date);
+            
+            // Ensure we're working with numeric values
+            $amount = 0;
+            if (isset($expense->amount) && !empty($expense->amount)) {
+                $amount = floatval($expense->amount);
+            }
+            
+            // Add to monthly total
             if (array_key_exists($month, $all_expenses)) {
-                $all_expenses[$month] = $all_expenses[$month] + $expense->amount;
+                $all_expenses[$month] = $all_expenses[$month] + $amount;
             } else {
-                $all_expenses[$month] = $expense->amount;
+                $all_expenses[$month] = $amount;
             }
         }
-
+        
+        // Get system settings for currency
+        $settings = $this->settings_model->getSettings();
+        
+        // Pass data to view
         $data['year'] = $year;
         $data['first_minute'] = $first_minute;
         $data['last_minute'] = $last_minute;
         $data['all_expenses'] = $all_expenses;
+        $data['settings'] = $settings;
+        $data['page_title'] = $year . ' ' . lang('hospital') . ' ' . lang('expense_report');
+        
+        // Get current month total for quick reference
+        $current_month = date('m-Y');
+        $data['current_month_total'] = !empty($all_expenses[$current_month]) ? $all_expenses[$current_month] : 0;
 
         $this->load->view('home/dashboard', $data);
         $this->load->view('monthly_expense', $data);
@@ -3270,30 +3513,36 @@ class Finance extends MX_Controller
     }
     public function expenseVsIncome()
     {
+        // Get selected year from URL parameter or use current year as default
+        $year = $this->input->get('year') ? $this->input->get('year') : date('Y');
         $month_year = date('m-y');
         $now = time();
 
-        $incomes = $this->finance_model->getDeposit();
-        $expenses = $this->finance_model->getExpense();
+        // Get income and expense data from model
+        $incomes = $this->finance_model->getPaymentsForIncomeExpense($year);
+        $expenses = $this->finance_model->getExpensesForIncomeExpense($year);
+        
         $total_income = 0;
         $this_month_total_income = 0;
         $this_week_total_income = 0;
         $this_week_total_expense = 0;
         $this_last_30_total_income = 0;
         $this_last_30_total_expense = 0;
+        
         if (!empty($incomes)) {
             foreach ($incomes as $income) {
-
-                $total_income += floatval($income->deposited_amount);
-                $month = date('m-y', $income->date);
-                if ($month_year == $month) {
-                    $this_month_total_income +=  floatval($income->deposited_amount);
-                }
-                if (($now - $income->date) <= (7 * 24 * 60 * 60)) {
-                    $this_week_total_income +=  floatval($income->deposited_amount);
-                }
-                if (($now - $income->date) <= (30 * 24 * 60 * 60)) {
-                    $this_last_30_total_income +=  floatval($income->deposited_amount);
+                if (isset($income->deposited_amount) && isset($income->date)) {
+                    $total_income += floatval($income->deposited_amount);
+                    $month = date('m-y', $income->date);
+                    if ($month_year == $month) {
+                        $this_month_total_income +=  floatval($income->deposited_amount);
+                    }
+                    if (($now - $income->date) <= (7 * 24 * 60 * 60)) {
+                        $this_week_total_income +=  floatval($income->deposited_amount);
+                    }
+                    if (($now - $income->date) <= (30 * 24 * 60 * 60)) {
+                        $this_last_30_total_income +=  floatval($income->deposited_amount);
+                    }
                 }
             }
         } else {
@@ -3304,26 +3553,26 @@ class Finance extends MX_Controller
         }
         $total_expense = 0;
         $this_month_total_expense = 0;
+        $this_week_total_expense = 0;
+        $this_last_30_total_expense = 0;
+        
         if (!empty($expenses)) {
             foreach ($expenses as $expense) {
-                $total_expense += $expense->amount;
-                $month = date('m-y', $expense->date);
-                if ($month_year == $month) {
-                    $this_month_total_expense += floatval($expense->amount);
-                }
+                if (isset($expense->amount) && isset($expense->date)) {
+                    $total_expense += floatval($expense->amount);
+                    $month = date('m-y', $expense->date);
+                    if ($month_year == $month) {
+                        $this_month_total_expense += floatval($expense->amount);
+                    }
 
-                if (($now - $expense->date) <= (7 * 24 * 60 * 60)) {
-                    $this_week_total_expense += floatval($expense->amount);
-                }
-                if (($now - $expense->date) <= (30 * 24 * 60 * 60)) {
-                    $this_last_30_total_expense += floatval($expense->amount);
+                    if (($now - $expense->date) <= (7 * 24 * 60 * 60)) {
+                        $this_week_total_expense += floatval($expense->amount);
+                    }
+                    if (($now - $expense->date) <= (30 * 24 * 60 * 60)) {
+                        $this_last_30_total_expense += floatval($expense->amount);
+                    }
                 }
             }
-        } else {
-            $total_expense = 0;
-            $this_month_total_expense = 0;
-            $this_week_total_expense = 0;
-            $this_last_30_total_expense = 0;
         }
 
         $data['total_income'] = $total_income;
@@ -3334,6 +3583,9 @@ class Finance extends MX_Controller
         $data['this_week_total_expense'] = $this_week_total_expense;
         $data['this_last_30_total_income'] = $this_last_30_total_income;
         $data['this_last_30_total_expense'] = $this_last_30_total_expense;
+        $data['payments'] = $incomes;
+        $data['expenses'] = $expenses;
+        $data['settings'] = $this->settings_model->getSettings();
 
         $this->load->view('home/dashboard');
         $this->load->view('expense_vs_income', $data);

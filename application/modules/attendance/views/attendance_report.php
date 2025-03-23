@@ -1,6 +1,5 @@
 <link href="common/extranal/css/hospital/report_subscription.css" rel="stylesheet">
 <?php
-touch('common/js/countrypicker.js');
 ?>
 
 
@@ -43,53 +42,71 @@ touch('common/js/countrypicker.js');
                                                 <form role="form" class="form_style" action="attendance/Report" method="post" enctype="multipart/form-data">
                                                     <div class="form-group">
                                                         <select class="form-control js-example-basic-single" name="staff" value=''>
-                                                            <?php foreach ($doctors as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($doctors) && !empty($doctors)) {
+                                                                foreach ($doctors as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
 
-                                                            <?php foreach ($laboratorists as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($laboratorists) && !empty($laboratorists)) {
+                                                                foreach ($laboratorists as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
 
-                                                            <?php foreach ($receptionists as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($receptionists) && !empty($receptionists)) {
+                                                                foreach ($receptionists as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
 
-                                                            <?php foreach ($pharmacists as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($pharmacists) && !empty($pharmacists)) {
+                                                                foreach ($pharmacists as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
 
-                                                            <?php foreach ($nurses as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($nurses) && !empty($nurses)) {
+                                                                foreach ($nurses as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
 
-                                                            <?php foreach ($accountants as $staff) { ?>
+                                                            <?php 
+                                                            if (isset($accountants) && !empty($accountants)) {
+                                                                foreach ($accountants as $staff) { ?>
                                                                 <option value="<?php echo $staff->ion_user_id; ?>" <?php
                                                                                                                     if ($staff->ion_user_id == $staff_select) {
                                                                                                                         echo 'selected';
                                                                                                                     }
                                                                                                                     ?>> <?php echo $staff->name; ?> </option>
-                                                            <?php } ?>
+                                                            <?php }
+                                                            } ?>
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
@@ -187,66 +204,76 @@ touch('common/js/countrypicker.js');
                                                     <tbody>
                                                         <?php
                                                         $i = 0;
-                                                        foreach ($attendances as $attendance) {
-                                                            $attendance = explode('#', $attendance->details);
-                                                            foreach ($attendance as $row) {
-                                                                $i = $i + 1;
-                                                                $details = explode('_', $row);
-                                                                if ($details[0] != 'NONE') {
-                                                                    $status = 'Present';
-                                                                } else {
-                                                                    $status = 'Absent';
+                                                        if (isset($attendances) && !empty($attendances)) {
+                                                            foreach ($attendances as $attendance) {
+                                                                if (!empty($attendance->details)) {
+                                                                    $attendance_details = explode('#', $attendance->details);
+                                                                    foreach ($attendance_details as $row) {
+                                                                        $i = $i + 1;
+                                                                        if (!empty($row)) {
+                                                                            $details = explode('_', $row);
+                                                                            if (isset($details[0]) && $details[0] != 'NONE') {
+                                                                                $status = 'Present';
+                                                                            } else {
+                                                                                $status = 'Absent';
+                                                                            }
+
+                                                                            if (isset($details[0]) && $details[0] == 'NONE') {
+                                                                                $clock_in = '';
+                                                                            } else {
+                                                                                $clock_in = isset($details[0]) ? $details[0] : '';
+                                                                            }
+                                                                            if (isset($details[1]) && $details[1] == 'NONE') {
+                                                                                $clock_out = '';
+                                                                            } else {
+                                                                                $clock_out = isset($details[1]) ? $details[1] : '';
+                                                                            }
+                                                                            if (isset($details[2]) && $details[2] == 'NONE') {
+                                                                                $late = '';
+                                                                            } else {
+                                                                                $late = isset($details[2]) ? $details[2] : '';
+                                                                            }
+                                                                            
+                                                                            if (!empty($clock_in) && !empty($clock_out)) {
+                                                                                $in_time = strtotime($clock_in);
+                                                                                $out_time = strtotime($clock_out);
+                                                                                $diff = $out_time - $in_time;
+                                                                                $hours = floor($diff / 3600);
+                                                                                $minutes = floor(($diff % 3600) / 60);
+                                                                                $seconds = $diff % 60;
+                                                                                if (!isset($total_diff)) {
+                                                                                    $total_diff = array();
+                                                                                }
+                                                                                $total_diff[] = $diff;
+                                                                            }
+                                                                        ?>
+                                                                        <tr>
+
+
+                                                                            <td><?php echo isset($staff_info->username) ? $staff_info->username : ''; ?></td>
+
+                                                                            <td> <?php echo isset($r_month) ? $r_month : $month_select; ?> <?php echo $i; ?></td>
+                                                                            <td> <?php echo $clock_in; ?></td>
+                                                                            <td> <?php echo $clock_out; ?></td>
+                                                                            <td> <?php echo $late; ?></td>
+                                                                            <td> <?php if (!empty($clock_in) && !empty($clock_out)) {
+                                                                                        echo "$hours : $minutes";
+                                                                                    } ?></td>
+                                                                            <td> <?php echo $status; ?></td>
+
+                                                                        </tr>
+                                                                    <?php
+                                                                        }
+                                                                    }
                                                                 }
-
-                                                                if ($details[0] == 'NONE') {
-                                                                    $clock_in = '';
-                                                                } else {
-                                                                    $clock_in = $details[0];
-                                                                }
-                                                                if ($details[1] == 'NONE') {
-                                                                    $clock_out = '';
-                                                                } else {
-                                                                    $clock_out = $details[1];
-                                                                }
-                                                                if ($details[2] == 'NONE') {
-                                                                    $late = '';
-                                                                } else {
-                                                                    $late = $details[2];
-                                                                }
-                                                                $in_time = strtotime($clock_in);
-                                                                $out_time = strtotime($clock_out);
-                                                                $diff = $out_time - $in_time;
-                                                                $hours = floor($diff / 3600);
-                                                                $minutes = floor(($diff % 3600) / 60);
-                                                                $seconds = $diff % 60;
-                                                                $total_diff[] = $diff;
-
-                                                        ?>
-                                                                <tr>
-
-
-                                                                    <td><?php echo $staff_info->username; ?></td>
-
-                                                                    <td> <?php echo $this->input->post('r_month'); ?> <?php echo $i; ?></td>
-                                                                    <td> <?php echo $clock_in; ?></td>
-                                                                    <td> <?php echo $clock_out; ?></td>
-                                                                    <td> <?php echo $late; ?></td>
-                                                                    <td> <?php if (!empty($clock_in)) {
-                                                                                echo "$hours : $minutes";
-                                                                            } ?></td>
-                                                                    <td> <?php echo $status; ?></td>
-
-                                                                </tr>
-                                                        <?php
-                                                                // }
                                                             }
                                                         }
-
                                                         ?>
                                                         <tr>
                                                             <td colspan="5" style="text-align:right; font-weight:bold">Total Duty Hours</td>
                                                             <td style="font-weight:bold">
-                                                                <?php if (!empty($this->input->post('staff'))) {
+                                                                <?php 
+                                                                if (isset($staff_info) && isset($total_diff) && !empty($total_diff)) {
                                                                     $total = array_sum($total_diff);
                                                                     $total_hours = floor($total / 3600);
                                                                     $total_minutes = floor(($total % 3600) / 60);
@@ -254,6 +281,7 @@ touch('common/js/countrypicker.js');
                                                                 }
                                                                 ?>
                                                             </td>
+                                                            <td></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -286,25 +314,24 @@ touch('common/js/countrypicker.js');
                                                         </div>
                                                         <div class="col-xs-8">
                                                             <div class="degree">
-
                                                                 <?php
                                                                 $total_days = array();
                                                                 $i = 0;
 
-                                                                foreach ($attendances as $attendance) {
-                                                                    $attendance = explode('#', $attendance->details);
-                                                                    foreach ($attendance as $row) {
-                                                                        $total_days[] = $i + 1;
-
-
-                                                                ?>
-
-                                                                <?php
-                                                                        // }
+                                                                if (isset($attendances) && !empty($attendances)) {
+                                                                    foreach ($attendances as $attendance) {
+                                                                        if (!empty($attendance->details)) {
+                                                                            $attendance_details = explode('#', $attendance->details);
+                                                                            foreach ($attendance_details as $row) {
+                                                                                if (!empty($row)) {
+                                                                                    $total_days[] = $i + 1;
+                                                                                }
+                                                                            }
+                                                                        }
                                                                     }
                                                                 }
 
-                                                                echo array_sum($total_days);
+                                                                echo !empty($total_days) ? array_sum($total_days) : 0;
                                                                 ?>
                                                             </div>
                                                         </div>
@@ -325,26 +352,25 @@ touch('common/js/countrypicker.js');
                                                                 <?php
                                                                 $total_present = array();
 
-
-                                                                foreach ($attendances as $attendance) {
-                                                                    $attendance = explode('#', $attendance->details);
-                                                                    $i = 0;
-                                                                    foreach ($attendance as $row) {
-                                                                        $details = explode('_', $row);
-                                                                        if ($details[0] != 'NONE') {
-                                                                            $total_present[] = $i + 1;
+                                                                if (isset($attendances) && !empty($attendances)) {
+                                                                    foreach ($attendances as $attendance) {
+                                                                        if (!empty($attendance->details)) {
+                                                                            $attendance_details = explode('#', $attendance->details);
+                                                                            $i = 0;
+                                                                            foreach ($attendance_details as $row) {
+                                                                                if (!empty($row)) {
+                                                                                    $details = explode('_', $row);
+                                                                                    if (isset($details[0]) && $details[0] != 'NONE') {
+                                                                                        $total_present[] = $i + 1;
+                                                                                    }
+                                                                                }
+                                                                                $i++;
+                                                                            }
                                                                         }
-
-
-
-                                                                ?>
-
-                                                                <?php
-                                                                        // }
                                                                     }
                                                                 }
 
-                                                                echo array_sum($total_present);
+                                                                echo !empty($total_present) ? array_sum($total_present) : 0;
                                                                 ?>
                                                             </div>
                                                         </div>
@@ -365,26 +391,25 @@ touch('common/js/countrypicker.js');
                                                                 <?php
                                                                 $total_absent = array();
 
-
-                                                                foreach ($attendances as $attendance) {
-                                                                    $attendance = explode('#', $attendance->details);
-                                                                    $i = 0;
-                                                                    foreach ($attendance as $row) {
-                                                                        $details = explode('_', $row);
-                                                                        if ($details[0] == 'NONE') {
-                                                                            $total_absent[] = $i + 1;
+                                                                if (isset($attendances) && !empty($attendances)) {
+                                                                    foreach ($attendances as $attendance) {
+                                                                        if (!empty($attendance->details)) {
+                                                                            $attendance_details = explode('#', $attendance->details);
+                                                                            $i = 0;
+                                                                            foreach ($attendance_details as $row) {
+                                                                                if (!empty($row)) {
+                                                                                    $details = explode('_', $row);
+                                                                                    if (isset($details[0]) && $details[0] == 'NONE') {
+                                                                                        $total_absent[] = $i + 1;
+                                                                                    }
+                                                                                }
+                                                                                $i++;
+                                                                            }
                                                                         }
-
-
-
-                                                                ?>
-
-                                                                <?php
-                                                                        // }
                                                                     }
                                                                 }
 
-                                                                echo array_sum($total_absent);
+                                                                echo !empty($total_absent) ? array_sum($total_absent) : 0;
                                                                 ?>
                                                             </div>
                                                         </div>
@@ -405,26 +430,25 @@ touch('common/js/countrypicker.js');
                                                                 <?php
                                                                 $total_late = array();
 
-
-                                                                foreach ($attendances as $attendance) {
-                                                                    $attendance = explode('#', $attendance->details);
-                                                                    $i = 0;
-                                                                    foreach ($attendance as $row) {
-                                                                        $details = explode('_', $row);
-                                                                        if ($details[2] == 'late') {
-                                                                            $total_late[] = $i + 1;
+                                                                if (isset($attendances) && !empty($attendances)) {
+                                                                    foreach ($attendances as $attendance) {
+                                                                        if (!empty($attendance->details)) {
+                                                                            $attendance_details = explode('#', $attendance->details);
+                                                                            $i = 0;
+                                                                            foreach ($attendance_details as $row) {
+                                                                                if (!empty($row)) {
+                                                                                    $details = explode('_', $row);
+                                                                                    if (isset($details[2]) && $details[2] == 'late') {
+                                                                                        $total_late[] = $i + 1;
+                                                                                    }
+                                                                                }
+                                                                                $i++;
+                                                                            }
                                                                         }
-
-
-
-                                                                ?>
-
-                                                                <?php
-                                                                        // }
                                                                     }
                                                                 }
 
-                                                                echo array_sum($total_late);
+                                                                echo !empty($total_late) ? array_sum($total_late) : 0;
                                                                 ?>
                                                             </div>
                                                         </div>
@@ -442,11 +466,14 @@ touch('common/js/countrypicker.js');
                                                         </div>
                                                         <div class="col-xs-8">
                                                             <div class="degree">
-                                                                <?php if (!empty($this->input->post('staff'))) {
+                                                                <?php 
+                                                                if (!empty($this->input->post('staff')) && isset($total_diff) && !empty($total_diff)) {
                                                                     $total = array_sum($total_diff);
                                                                     $total_hours = floor($total / 3600);
                                                                     $total_minutes = floor(($total % 3600) / 60);
                                                                     echo "$total_hours : $total_minutes";
+                                                                } else {
+                                                                    echo "0 : 0";
                                                                 }
                                                                 ?>
                                                             </div>
@@ -491,7 +518,7 @@ touch('common/js/countrypicker.js');
 
 
 
-<script src="common/js/codearistos.min.js"></script>
+<script src="<?php echo base_url(); ?>common/js/codearistos.min.js"></script>
 
 
 <script>
@@ -526,8 +553,6 @@ touch('common/js/countrypicker.js');
             "language": {
                 "lengthMenu": "_MENU_ records per page",
             }
-
-
         });
     });
 </script>

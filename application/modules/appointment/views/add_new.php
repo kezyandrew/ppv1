@@ -1,5 +1,11 @@
 <link href="common/extranal/css/appointment/add_new.css" rel="stylesheet">
 
+<!-- Debug information -->
+<div style="display: none;">
+    <p>Is Object: <?php echo $is_object ? 'Yes' : 'No'; ?></p>
+    <p>Has Payment Status: <?php echo $has_payment_status ? 'Yes' : 'No'; ?></p>
+    <p>Payment Status: <?php echo $appointment->payment_status ?? 'Not set'; ?></p>
+</div>
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -44,8 +50,8 @@
                                     <div class="form-group col-md-12 patient_div">
                                         <label for="exampleInputEmail1"> <?php echo lang('patient'); ?> &#42;</label>
                                         <?php if (!$this->ion_auth->in_group(array('Patient'))) { ?>
-                                            <select class="form-control m-bot15  pos_select" id="pos_select" name="patient" value='' required>
-                                                <?php if (!empty($appointment)) { ?>
+                                            <select class="form-control m-bot15 pos_select" id="pos_select" name="patient" value='' required>
+                                                <?php if (isset($patients) && !empty($appointment->id)) { ?>
                                                     <option value="<?php echo $patients->id; ?>" selected="selected"><?php echo $patients->name; ?> - <?php echo $patients->id; ?></option>
                                                 <?php } ?>
                                             </select>
@@ -54,7 +60,9 @@
                                             $patients = $this->db->get_where('patient', array('ion_user_id' => $user))->row();
                                         ?>
                                             <select class="form-control m-bot15 pos_select" id="pos_select" name="patient" value='' required>
-                                                <option value="<?php echo $patients->id; ?>" selected="selected"><?php echo $patients->name; ?> - <?php echo $patients->id; ?></option>
+                                                <?php if (isset($patients)) { ?>
+                                                    <option value="<?php echo $patients->id; ?>" selected="selected"><?php echo $patients->name; ?> - <?php echo $patients->id; ?></option>
+                                                <?php } ?>
                                             </select>
                                         <?php } ?>
                                     </div>
@@ -134,7 +142,7 @@
                                     <div class="form-group col-md-12 doctor_div">
                                         <label for="exampleInputEmail1"> <?php echo lang('doctor'); ?> &#42;</label>
                                         <select class="form-control m-bot15" id="adoctors" name="doctor" value='' required="">
-                                            <?php if (!empty($appointment)) { ?>
+                                            <?php if (isset($doctors) && !empty($appointment->id)) { ?>
                                                 <option value="<?php echo $doctors->id; ?>" selected="selected"><?php echo $doctors->name; ?> - <?php echo $doctors->id; ?></option>
                                             <?php } ?>
                                         </select>
@@ -146,22 +154,29 @@
 
                                     <div class="col-md-12 form-group">
                                         <label class=""><?php echo lang('visit'); ?> <?php echo lang('description'); ?></label>
-                                        <select class="form-control m-bot15" name="visit_description" style="<?php if ($appointment->payment_status == 'paid') {
-                                                                                                                    echo ' pointer-events: none;';
-                                                                                                                } ?>" id="visit_description" value='' required>
+                                        <?php 
+                                        // Default style is empty
+                                        $style = '';
+                                        // Only apply style if appointment is an object and payment_status is 'paid'
+                                        if (is_object($appointment) && isset($appointment->payment_status) && $appointment->payment_status == 'paid') {
+                                            $style = 'pointer-events: none;';
+                                        }
+                                        ?>
+                                        <select class="form-control m-bot15" name="visit_description" style="<?php echo $style; ?>" id="visit_description" value='' required>
+                                            <option value=""><?php echo lang('select'); ?></option>
                                             <?php
-                                            if (!empty($appointment->id)) {
-                                            ?>
-                                                <option value=""><?php echo lang('select'); ?></option>
-                                                <?php
+                                            if (isset($visits) && is_array($visits) && !empty($visits)) {
                                                 foreach ($visits as $visit) {
+                                                    if (isset($visit->id) && isset($visit->visit_description)) {
                                                 ?>
                                                     <option value="<?php echo $visit->id; ?>" <?php
-                                                                                                if ($visit->id == $appointment->visit_description) {
-                                                                                                    echo 'selected';
-                                                                                                }
-                                                                                                ?>><?php echo $visit->visit_description ?> </option>
-                                            <?php }
+                                                        if (isset($appointment->visit_description) && $visit->id == $appointment->visit_description) {
+                                                            echo 'selected';
+                                                        }
+                                                    ?>><?php echo $visit->visit_description; ?></option>
+                                                <?php 
+                                                    }
+                                                }
                                             }
                                             ?>
                                         </select>
@@ -265,7 +280,7 @@
                                     </div>
 
                                     <?php if (!$this->ion_auth->in_group(array('Nurse', 'Doctor'))) { ?>
-                                        <?php if ($appointment->payment_status == 'paid') { ?>
+                                        <?php if (is_object($appointment) && $appointment->payment_status == 'paid') { ?>
                                             <div class="form-group col-md-12 form_data">
                                                 <label for="exampleInputEmail1"><?php echo lang('payment'); ?> <?php echo lang('status'); ?></label>
                                                 <input type="text" class="form-control" name="" id="" value='<?php echo lang('paid'); ?>' placeholder="" readonly="">

@@ -8,11 +8,284 @@ and open the template in the editor.
     Author     : sahas
 */
 
-
-.billl{
-    background: #39B24F !important;
+/* Modern Financial Report Styling */
+:root {
+    --primary-color: #007bff;
+    --primary-light: #cfe2ff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
 }
 
-.due{
-    background: #39B1D1 !important;
+body {
+    background-color: #f5f5f5;
+}
+
+.content-wrapper {
+    padding: 20px;
+}
+
+/* Card styling */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h4, .card-header h5 {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+.card-header.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.card-header.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Table styling */
+.table {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure the data cells are aligned right for amounts */
+.table td:last-child {
+    text-align: right;
+}
+
+.table th:last-child {
+    text-align: right;
+}
+
+/* Form styling */
+.form-control {
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+}
+
+/* Button styling */
+.btn {
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Summary cards */
+.card.mb-3 {
+    transition: all 0.2s ease;
+    margin-bottom: 1rem !important;
+}
+
+.card.mb-3:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.card.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+.card.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.card.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.card.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Card value formatting */
+.card-body strong {
+    font-weight: 600;
+}
+
+.card-body .d-flex strong {
+    font-size: 1.05rem;
+}
+
+.card-body .d-flex i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Icons */
+.fa, .fas {
+    margin-right: 0.5rem;
+}
+
+/* Summary rows */
+.bg-light {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.bg-light td {
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 10px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .card-header button {
+        margin-top: 0.5rem;
+        align-self: flex-start;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group > * {
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    
+    .table-responsive {
+        border: 0;
+    }
+}
+
+/* Print styling */
+@media print {
+    body {
+        background-color: #fff;
+    }
+    
+    .content-wrapper {
+        padding: 0;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+    
+    .btn, .input-group button {
+        display: none;
+    }
+    
+    .card-body {
+        page-break-inside: avoid;
+    }
+    
+    .table-responsive {
+        overflow-x: visible;
+    }
+}
+
+/* Date picker styling */
+.default-date-picker {
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* Table responsive */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Special formatting for financial values */
+.amount-value {
+    font-family: 'Courier New', monospace;
+    text-align: right;
 }

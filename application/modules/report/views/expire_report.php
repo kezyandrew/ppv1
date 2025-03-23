@@ -53,8 +53,11 @@
                                             <td>
                                                 <?php
                                                 $patient = explode('*', $report->patient);
-                                                if (!empty($patient)) {
-                                                    echo $this->patient_model->getPatientById($patient[0])->name;
+                                                if (!empty($patient) && isset($patient[0]) && !empty($patient[0])) {
+                                                    $patient_obj = $this->patient_model->getPatientById($patient[0]);
+                                                    echo $patient_obj ? $patient_obj->name : 'Patient Not Found';
+                                                } else {
+                                                    echo 'Patient Not Found';
                                                 }
                                                 ?>
                                             </td>
@@ -62,7 +65,10 @@
                                             <td>
                                                 <?php
                                                 if (!empty($report->doctor)) {
-                                                    echo $this->doctor_model->getDoctorById($report->doctor)->name;
+                                                    $doctor_obj = $this->doctor_model->getDoctorById($report->doctor);
+                                                    echo $doctor_obj ? $doctor_obj->name : 'Doctor Not Found';
+                                                } else {
+                                                    echo 'Doctor Not Found';
                                                 }
                                                 ?>
                                             </td>
@@ -149,12 +155,13 @@
                         <select class="form-control m-bot15 js-example-basic-single" name="patient" value=''>
                             <?php foreach ($patients as $patient) { ?>
                                 <option value="<?php echo $patient->id . '*' . $patient->ion_user_id; ?>" <?php
-                                                                                                            if (!empty($report->patient)) {
-                                                                                                                if (explode('*', $report->patient)[1] == $patient->ion_user_id) {
-                                                                                                                    echo 'selected';
-                                                                                                                }
-                                                                                                            }
-                                                                                                            ?>><?php echo $patient->name; ?> </option>
+if (!empty($report->patient)) {
+    $patient_parts = explode('*', $report->patient);
+    if (isset($patient_parts[0]) && $patient_parts[0] == $patient->id) {
+        echo 'selected';
+    }
+}
+?>><?php echo $patient->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -163,12 +170,12 @@
                         <select class="form-control m-bot15 js-example-basic-single" name="doctor" value=''>
                             <?php foreach ($doctors as $doctor) { ?>
                                 <option value="<?php echo $doctor->id; ?>" <?php
-                                                                            if (!empty($report->doctor)) {
-                                                                                if ($report->doctor == $doctor->name) {
-                                                                                    echo 'selected';
-                                                                                }
-                                                                            }
-                                                                            ?>><?php echo $doctor->name; ?> </option>
+if (!empty($report->doctor)) {
+    if ($report->doctor == $doctor->id) {
+        echo 'selected';
+    }
+}
+?>><?php echo $doctor->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -243,12 +250,13 @@
                         <select class="form-control m-bot15 js-example-basic-single patient" name="patient" value=''>
                             <?php foreach ($patients as $patient) { ?>
                                 <option value="<?php echo $patient->id . '*' . $patient->ion_user_id; ?>" <?php
-                                                                                                            if (!empty($report->patient)) {
-                                                                                                                if (explode('*', $report->patient)[1] == $patient->ion_user_id) {
-                                                                                                                    echo 'selected';
-                                                                                                                }
-                                                                                                            }
-                                                                                                            ?>><?php echo $patient->name; ?> </option>
+if (!empty($report->patient)) {
+    $patient_parts = explode('*', $report->patient);
+    if (isset($patient_parts[0]) && $patient_parts[0] == $patient->id) {
+        echo 'selected';
+    }
+}
+?>><?php echo $patient->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -257,12 +265,12 @@
                         <select class="form-control m-bot15 js-example-basic-single doctor" name="doctor" value=''>
                             <?php foreach ($doctors as $doctor) { ?>
                                 <option value="<?php echo $doctor->id; ?>" <?php
-                                                                            if (!empty($report->doctor)) {
-                                                                                if ($report->doctor == $doctor->name) {
-                                                                                    echo 'selected';
-                                                                                }
-                                                                            }
-                                                                            ?>><?php echo $doctor->name; ?> </option>
+if (!empty($report->doctor)) {
+    if ($report->doctor == $doctor->id) {
+        echo 'selected';
+    }
+}
+?>><?php echo $doctor->name; ?> </option>
                             <?php } ?>
                         </select>
                     </div>
